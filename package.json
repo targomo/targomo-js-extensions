@@ -52,5 +52,9 @@
     "typescript": "^2.5.0",
     "webpack": "^3.8.1",
     "webpack-node-externals": "1.6.0"
+  },
+  "dependencies": {
+    "@targomo/core": "^0.1.5",
+    "@types/googlemaps": "^3.30.10"
   }
 }

@@ -41,7 +41,7 @@ rollup.rollup({
   plugins: defaultPlugins,
 }).then(bundle => {
   bundle.write({
-    name: 'tgm',
+    name: 'tgm.googlemaps',
     sourcemap: true,
     format: 'umd',
     banner: getBanner(),
@@ -78,7 +78,7 @@ rollup.rollup({
   ],
 }).then(bundle => {
   bundle.write({
-    name: 'tgm',
+    name: 'tgm.googlemaps',
     sourcemap: true,
     format: 'umd',
     banner: getBanner(),
