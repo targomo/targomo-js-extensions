@@ -1,1 +1,1 @@
-export * from './polygon-overlay/polygon-overlay'
+export * from './polygon-overlay/polygonOverlay'

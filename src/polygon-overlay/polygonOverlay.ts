@@ -1,15 +1,23 @@
 /// <reference path='../../node_modules/@types/googlemaps/index.d.ts' />
 
+import {polygonToSVG} from './util'
+
 export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
   private imageElement: HTMLImageElement
-  private data: any
+  private data: any = 'http://localhost/embedmap/gold-star.svg'
   private dataBounds: google.maps.LatLngBounds
 
   constructor(map: google.maps.Map) {
     super()
 
     this.setMap(map)
+
+    // test
+    this.dataBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(60.626, 25.285),
+      new google.maps.LatLng(60.627, 25.29)
+    )
   }
 
   draw() {
@@ -53,11 +61,13 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     this.divElement = null
   }
 
-  setData(multipolygon: any) {
+  setData(multipolygon: any[]) {
     /// Testing
     this.dataBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(60.626, 25.285),
       new google.maps.LatLng(60.627, 25.29)
     )
+
+    console.log('DATA', polygonToSVG(this.getMap() as any, multipolygon))
   }
 }
