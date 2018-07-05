@@ -7,7 +7,7 @@
 
 import {r360Point} from './point'
 
-const TOLERANCE = 10
+const TOLERANCE = 0
 
 export function clip(subjectPolygon: any, clipPolygon: any) {
     let cp1: any

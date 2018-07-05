@@ -44,6 +44,8 @@ function getInnerBoundary(polygon: any) {
 function createSvgData(polygon: any, options: any) {
   let pathData: any[] = []
 
+  console.log('CREATE SVG DATA', polygon)
+
   // const topRight   = polygonUtil.scale(getTopRightDecimal(polygon), options.scale);
   // const bottomLeft = polygonUtil.scale(getBottomLeftDecimal(polygon), options.scale);
 
@@ -126,10 +128,16 @@ function buildSVGPolygon(pathData: any, coordinateArray: any, options: any) {
   let clippedArray = polygonUtil.clip(pointsToClip, boundArray)
   let lastPoint;
 
+  console.log('POINTS TO CLIP', pointsToClip)
+  console.log('CLIPPED ARRAY', clippedArray, boundArray)
+  clippedArray = pointsToClip
+  console.log('CLIPPED ARRAY-2', clippedArray)
+
   for (let i = 0; i < clippedArray.length; i++) {
-    point = polygonUtil.subtract(r360Point(clippedArray[i][0], clippedArray[i][1]),
-                                        options.pixelOrigin.x + options.offset.x,
-                                        options.pixelOrigin.y + options.offset.y)
+    point = r360Point(clippedArray[i][0], clippedArray[i][1])
+    // point = polygonUtil.subtract(r360Point(clippedArray[i][0], clippedArray[i][1]),
+    //                                     options.pixelOrigin.x + options.offset.x,
+    //                                     options.pixelOrigin.y + options.offset.y)
 
     pathData.push( i > 0 ? polygonUtil.buildPath(point, 'L') : polygonUtil.buildPath(point, 'M'))
     lastPoint = point;
@@ -139,6 +147,7 @@ function buildSVGPolygon(pathData: any, coordinateArray: any, options: any) {
     pathData.push(['z']) // svgz
   }
 
+  console.log('PATH DATA', pathData)
   return pathData
 }
 
@@ -153,7 +162,7 @@ function createGElement(svgData: any, elementOptions: any) {
   let initialOpacity = elementOptions.opacity
 
   return `
-    <g id="${randomId}" style='opacity: ${initialOpacity}>
+    <g id="${randomId}" style='opacity: ${initialOpacity}'>
       <path style='stroke: ${elementOptions.color};
             fill: ${elementOptions.color};
             stroke-opacity: 1;
@@ -189,8 +198,8 @@ export function polygonToSVG(map: google.maps.Map, multipolygonsData: any[]) {
   let strokeWidth = 5
 
   let options = {
-    scale: 1,
-    tolerance: 10,
+    scale: 1000, // Math.pow(2, map.getZoom()) * 256,
+    tolerance: 0,
     color             : inverse ? color : 'black',
     opacity           : inverse ? 1 : 1, // multiPolygon.getOpacity(),
     strokeWidth       : strokeWidth,
@@ -215,9 +224,7 @@ function parsePolygon(multiPolygonSource: any) {
   let multiPolygon: any[] = []
 
   multiPolygonSource.forEach((polygonsSource: any) => {
-    console.log('FOR EACH-polygonsSource', polygonsSource)
     polygonsSource.polygons.forEach((polygonSource: any) => {
-      console.log('FOR EACH-polygonSource', polygonSource)
       // create a polygon with the outer boundary as the initial linestring
       // let polygon = r360.polygon(polygonJson.travelTime, polygonJson.area,
       // ew LineString(r360.Util.parseLatLonArray(polygonJson.outerBoundary)));
@@ -245,7 +252,6 @@ function parsePolygon(multiPolygonSource: any) {
         }
       }
 
-      console.log('ADD POLYGON', polygon)
       polygonUtil.addPolygonToMultiPolygon(multiPolygon, polygon);
     })
   })

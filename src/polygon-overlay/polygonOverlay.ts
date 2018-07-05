@@ -50,6 +50,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     img.style.position = 'absolute'
     div.appendChild(img)
 
+    this.imageElement = img
     this.divElement = div
 
     const panes = this.getPanes()
@@ -68,6 +69,18 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
       new google.maps.LatLng(60.627, 25.29)
     )
 
-    console.log('DATA', polygonToSVG(this.getMap() as any, multipolygon))
+    const elements = polygonToSVG(this.getMap() as any, multipolygon)
+    const svg = `<svg height="900" width="2143.8"
+                      style="fill:#000000;
+                      opacity: 0.4; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd"
+                      xmlns="http://www.w3.org/2000/svg">${elements.join('\n')}</svg>`
+
+    console.log('SVG', svg)
+
+    this.imageElement.src = 'data:image/svg+xml;utf8,' + svg
+    // data:image/svg+xml;charset=UTF-8,
+
+    // document.body.appendChild()
+    document.write(svg) /// test
   }
 }
