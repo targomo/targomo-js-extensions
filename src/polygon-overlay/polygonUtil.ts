@@ -186,19 +186,41 @@ export function extendBounds(bounds: any, extendWidthX: any, extendWidthY: any) 
 /*
   *
   */
-// export function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
-//     let filteredMultiPolygons = multiPolygons.filter(
-//       function(multiPolygon: any) { return multiPolygon.getTravelTime() == polygon.travelTime; })
+export function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
+    // let filteredMultiPolygons = multiPolygons.filter(
+    //   function(multiPolygon: any) { return multiPolygon.getTravelTime() == polygon.travelTime; })
 
-//     // multipolygon with polygon's travetime already there
-//     if ( filteredMultiPolygons.length > 0 ) {
-//       filteredMultiPolygons[0].addPolygon(polygon);
-//     } else {
-//         let multiPolygon = new r360.multiPolygon();
-//         multiPolygon.setTravelTime(polygon.travelTime);
-//         multiPolygon.addPolygon(polygon);
-//         multiPolygon.setColor(polygon.getColor());
-//         multiPolygon.setOpacity(polygon.getOpacity());
-//         multiPolygons.push(multiPolygon);
-//     }
-// }
+    // // multipolygon with polygon's travetime already there
+    // if ( filteredMultiPolygons.length > 0 ) {
+    //   filteredMultiPolygons[0].addPolygon(polygon);
+    // } else {
+    //     let multiPolygon = new r360.multiPolygon();
+    //     multiPolygon.setTravelTime(polygon.travelTime);
+    //     multiPolygon.addPolygon(polygon);
+    //     multiPolygon.setColor(polygon.getColor());
+    //     multiPolygon.setOpacity(polygon.getOpacity());
+    //     multiPolygons.push(multiPolygon);
+    // }
+
+    let filteredMultiPolygons = multiPolygons.filter(
+        function(multiPolygon: any) { return multiPolygon.travelTime == polygon.travelTime; })
+
+      // multipolygon with polygon's travetime already there
+      if ( filteredMultiPolygons.length > 0 ) {
+        filteredMultiPolygons[0].polygons.push(polygon);
+      } else {
+        //   let multiPolygon = new r360.multiPolygon();
+        //   multiPolygon.setTravelTime(polygon.travelTime);
+        //   multiPolygon.addPolygon(polygon);
+        //   multiPolygon.setColor(polygon.getColor());
+        //   multiPolygon.setOpacity(polygon.getOpacity());
+        //   multiPolygons.push(multiPolygon);
+
+        multiPolygons.push({
+            travelTime: polygon.travelTime,
+            color: polygon.color,
+            opacity: polygon.opacity,
+            polygons: [polygon]
+        })
+      }
+}

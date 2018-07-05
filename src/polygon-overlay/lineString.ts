@@ -1,5 +1,30 @@
 import {r360Point, Point} from './point'
-import {geometry, LatLng} from '@targomo/core'
+// import {geometry} from '@targomo/core'
+
+let geometry = {
+  webMercatorToLatLng(point: { x: number, y: number }, elevation: number) {
+    let latlng = this.unproject(point)
+
+    if (elevation != undefined) {
+      // x,y,z given so we have elevation data
+      return { lat: latlng.lat, lng: latlng.lng, elevation }
+    } else {
+      // no elevation given, just unproject coordinates to lat/lng
+      return latlng
+    }
+  },
+
+  R: 6378137,
+
+  unproject(point: {x: number, y: number}) {
+    let d = 180 / Math.PI
+
+    return {
+      lat: (2 * Math.atan(Math.exp(point.y / this.R)) - (Math.PI / 2)) * d,
+      lng: point.x * d / this.R
+    }
+  }
+}
 
 
 ///

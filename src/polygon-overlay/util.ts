@@ -3,6 +3,7 @@
 import * as polygonUtil from './polygonUtil'
 import {r360Point} from './point'
 import * as googleUtil from './googleUtil'
+import { LineString } from './lineString';
 
 // const options = {
 //   scale: 1,
@@ -165,6 +166,7 @@ function createGElement(svgData: any, elementOptions: any) {
 }
 
 function getMapPixelBounds(map: google.maps.Map) {
+  console.log('map bounds', map.getBounds())
   let bottomLeft = googleUtil.googleLatlngToPoint(map, map.getBounds().getSouthWest(), map.getZoom());
   let topRight   = googleUtil.googleLatlngToPoint(map, map.getBounds().getNorthEast(), map.getZoom());
 
@@ -179,7 +181,9 @@ function getPixelOrigin(map: google.maps.Map) {
 };
 
 
-export function polygonToSVG(map: google.maps.Map, multipolygons: any[]) {
+export function polygonToSVG(map: google.maps.Map, multipolygonsData: any[]) {
+  let multipolygons = parsePolygon(multipolygonsData)
+
   let inverse = false
   let color   = 'black' // multiPolygon.getColor && multiPolygon.getColor()
   let strokeWidth = 5
@@ -206,3 +210,59 @@ export function polygonToSVG(map: google.maps.Map, multipolygons: any[]) {
   return elements
 }
 
+
+function parsePolygon(multiPolygonSource: any) {
+  let multiPolygon: any[] = []
+
+  multiPolygonSource.forEach((polygonsSource: any) => {
+    console.log('FOR EACH-polygonsSource', polygonsSource)
+    polygonsSource.polygons.forEach((polygonSource: any) => {
+      console.log('FOR EACH-polygonSource', polygonSource)
+      // create a polygon with the outer boundary as the initial linestring
+      // let polygon = r360.polygon(polygonJson.travelTime, polygonJson.area,
+      // ew LineString(r360.Util.parseLatLonArray(polygonJson.outerBoundary)));
+
+      // let polygon = r360.polygon(polygonSource.travelTime, polygonSource.area,
+      //                   new LineString(parseLatLonArray(polygonSource.outerBoundary)));
+      let polygon = {
+        travelTime: polygonSource.travelTime,
+        area: polygonSource.area,
+        lineStrings: [new LineString(parseLatLonArray(polygonSource.outerBoundary))]
+      }
+
+      // set color and default to black of not found
+      // let var color       = r360.findWhere(r360.config.defaultTravelTimeControlOptions.travelTimes, { time : polygon.getTravelTime() });
+      // polygon.setColor(!r360.isUndefined(color) ? color.color : '#000000');
+      // // set opacity and default to 1 if not found
+      // var opacity = r360.findWhere(r360.config.defaultTravelTimeControlOptions.travelTimes, { time : polygon.getTravelTime() })
+      // polygon.setOpacity(!r360.isUndefined(opacity) ? opacity.opacity : 1);
+
+      if (polygonSource.innerBoundary != undefined) {
+        // add all inner linestrings to polygon
+        for (let k = 0 ; k < polygonSource.innerBoundary.length ; k++ ) {
+          // polygon.addInnerBoundary(new LineString(parseLatLonArray(polygonSource.innerBoundary[k])));
+          polygon.lineStrings.push(new LineString(parseLatLonArray(polygonSource.innerBoundary[k])));
+        }
+      }
+
+      console.log('ADD POLYGON', polygon)
+      polygonUtil.addPolygonToMultiPolygon(multiPolygon, polygon);
+    })
+  })
+
+  multiPolygon.sort(function(a: any, b: any) { return b.travelTime - a.travelTime; });
+
+  console.log('PASED MULTY', multiPolygon)
+  return multiPolygon
+}
+
+
+function parseLatLonArray(latlngs: any[]) {
+  let coordinates = new Array()
+
+  for (let i = 0 ; i < latlngs.length ; i++ ) {
+      coordinates.push(r360Point(latlngs[i][0], latlngs[i][1]))
+  }
+
+  return coordinates;
+}
