@@ -1,5 +1,6 @@
 import { MultipolygonData, PolygonData } from './types'
 import * as geometry from './geometry'
+import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint } from './projectedPolygon';
 
 const FACTOR = 10000000
 
@@ -34,7 +35,94 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function createSVG(multipolygons: MultipolygonData[]): {svg: string, bounds: any} {
+export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, bounds: any} {
+  const elements: any[] = []
+
+  function buildSVGPolygonInner(pathData: any[], coordinateArray: ProjectedPoint[]) {
+    coordinateArray.forEach((point, i) => {
+      let suffix = i > 0 ? 'L' : 'M'
+      const generatedPoint = `${suffix} ${point.x * FACTOR} ${point.y * FACTOR}`
+      pathData.push(generatedPoint)
+    })
+
+    if (pathData.length > 0) {
+      pathData.push('z') // svgz
+    }
+
+    return pathData
+  }
+
+  function createSvgDataLocal(polygon: ProjectedPolygon) {
+    let pathData: any = []
+
+    buildSVGPolygonInner(pathData, polygon.getOuterBoundary().points)
+
+    const innerBoundary = polygon.getInnerBoundary()
+
+    for (let i = 0; i < innerBoundary.length; i++) {
+      buildSVGPolygonInner(pathData, innerBoundary[i].points)
+    }
+
+    return pathData
+  }
+
+  multipolygons.forEach((travelTime, polygons) => {
+    console.log('MULTIPOLYGON COLORS', COLORS)
+    console.log('MULTIPOLYGON RESULT', polygons)
+    console.log('MULTIPOLYGON RESULT COLOR', travelTime, COLORS[travelTime])
+
+    let svgData = polygons.map((item: any) => createSvgDataLocal(item).join(' ')).join(' ')
+
+    if (svgData.length != 0) {
+      elements.push(createGElement(svgData, {
+        opacity: 1,
+        strokeWidth: 5,
+        color: COLORS[travelTime]
+      }))
+    }
+  })
+
+  let xMin = multipolygons.bounds3857.southWest.x
+  let yMin = multipolygons.bounds3857.southWest.y
+  let xMax = multipolygons.bounds3857.northEast.x
+  let yMax = multipolygons.bounds3857.northEast.y
+
+
+  const pairMin = geometry.webMercatorToLeaflet(xMin, yMin, FACTOR)
+  const pairMax = geometry.webMercatorToLeaflet(xMax, yMax, FACTOR)
+
+  if (pairMax.y < pairMin.y) {
+    [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
+  }
+
+  const xMinLeaflet = Math.round(pairMin.x)
+  const yMinLeaflet = Math.round(pairMin.y)
+  const xMaxLeaflet = Math.round(pairMax.x)
+  const yMaxLeaflet = Math.round(pairMax.y)
+
+
+  console.log('ORIGINAL', yMin, yMax, xMin, xMax)
+  console.log('MIN', pairMin)
+  console.log('MAX', pairMax)
+
+  const svg = `
+    <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
+          style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
+          xmlns='http://www.w3.org/2000/svg'>
+          ${elements.join('\n')}
+    </svg>`
+
+  console.log('SVG', svg)
+
+  return {
+    svg,
+    bounds: {
+      xMin, xMax, yMin, yMax,
+    }
+  }
+}
+/*
+export function createSVG2(multipolygons: MultipolygonData[]): {svg: string, bounds: any} {
   let elements: any[] = []
 
   let xMin: number = Infinity
@@ -171,7 +259,7 @@ function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
     })
   }
 }
-
+*/
 
 function buildSVGPolygon(pathData: any[], coordinateArray: [number, number][]) {
   coordinateArray.forEach((point, i) => {

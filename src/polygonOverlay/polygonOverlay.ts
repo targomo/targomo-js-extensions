@@ -5,16 +5,26 @@ import {geometry} from '@targomo/core'
 import { MultipolygonData } from './types';
 import { ProjectedMultiPolygon } from './projectedPolygon';
 
+/**
+ *
+ */
 export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
   private dataBounds: google.maps.LatLngBounds
 
+  /**
+   *
+   * @param map
+   */
   constructor(map: google.maps.Map) {
     super()
 
     this.setMap(map)
   }
 
+  /**
+   *
+   */
   draw() {
     if (!this.dataBounds) {
       return
@@ -31,6 +41,9 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     div.style.height = (sw.y - ne.y) + 'px'
   }
 
+  /**
+   *
+   */
   onAdd() {
     console.log('ON ADD')
     const div = document.createElement('div')
@@ -45,17 +58,27 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     panes.overlayMouseTarget.appendChild(div)
   }
 
+  /**
+   *
+   */
   onRemove() {
     this.divElement.parentNode.removeChild(this.divElement)
     this.divElement = null
   }
 
+  /**
+   *
+   * @param multipolygon
+   */
   setData(multipolygon: MultipolygonData[]) {
-    console.log('PROCESSED', new ProjectedMultiPolygon(multipolygon))
+    const now2 = new Date().getTime()
+    const projectedMultiPolygon = new ProjectedMultiPolygon(multipolygon)
+    console.log('PROCESSED', projectedMultiPolygon)
+    console.log('**** PRE PROCESSING TIME ****', new Date().getTime() - now2)
 
     // console.log('THIS', this.imageElement)
     const now = new Date().getTime()
-    const result = svgUtil.createSVG(multipolygon)
+    const result = svgUtil.createSVG(projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result.svg
