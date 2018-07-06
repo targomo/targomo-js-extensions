@@ -83,8 +83,8 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     this.divElement.innerHTML = result.svg
 
-    const southWest = geometry.webMercatorToLatLng({x: result.bounds.xMin, y: result.bounds.yMin}, undefined)
-    const northEast = geometry.webMercatorToLatLng({x: result.bounds.xMax, y: result.bounds.yMax}, undefined)
+    const southWest = geometry.webMercatorToLatLng({x: result.bounds3857.southWest.x, y: result.bounds3857.southWest.y}, undefined)
+    const northEast = geometry.webMercatorToLatLng({x: result.bounds3857.northEast.x, y: result.bounds3857.northEast.y}, undefined)
 
     this.dataBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(southWest.lat, southWest.lng),

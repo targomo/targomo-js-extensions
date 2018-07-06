@@ -1,6 +1,6 @@
 import { MultipolygonData, PolygonData } from './types'
 import * as geometry from './geometry'
-import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint } from './projectedPolygon';
+import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from './projectedPolygon';
 
 const FACTOR = 10000000
 
@@ -35,11 +35,11 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, bounds: any} {
+export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, bounds3857: ProjectedBounds} {
   const elements: any[] = []
 
-  function buildSVGPolygonInner(pathData: any[], coordinateArray: ProjectedPoint[]) {
-    coordinateArray.forEach((point, i) => {
+  function buildSVGPolygonInner(pathData: any[], points: ProjectedPoint[]) {
+    points.forEach((point, i) => {
       let suffix = i > 0 ? 'L' : 'M'
       const generatedPoint = `${suffix} ${point.x * FACTOR} ${point.y * FACTOR}`
       pathData.push(generatedPoint)
@@ -56,23 +56,19 @@ export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, b
     let pathData: any = []
 
     buildSVGPolygonInner(pathData, polygon.getOuterBoundary().points)
-
-    const innerBoundary = polygon.getInnerBoundary()
-
-    for (let i = 0; i < innerBoundary.length; i++) {
-      buildSVGPolygonInner(pathData, innerBoundary[i].points)
-    }
+    polygon.getInnerBoundary().forEach(innerBoundary => {
+      buildSVGPolygonInner(pathData, innerBoundary.points)
+    })
 
     return pathData
   }
 
   multipolygons.forEach((travelTime, polygons) => {
-    console.log('MULTIPOLYGON COLORS', COLORS)
-    console.log('MULTIPOLYGON RESULT', polygons)
-    console.log('MULTIPOLYGON RESULT COLOR', travelTime, COLORS[travelTime])
+    // console.log('MULTIPOLYGON COLORS', COLORS)
+    // console.log('MULTIPOLYGON RESULT', polygons)
+    // console.log('MULTIPOLYGON RESULT COLOR', travelTime, COLORS[travelTime])
 
-    let svgData = polygons.map((item: any) => createSvgDataLocal(item).join(' ')).join(' ')
-
+    const svgData = polygons.map(item => createSvgDataLocal(item).join(' ')).join(' ')
     if (svgData.length != 0) {
       elements.push(createGElement(svgData, {
         opacity: 1,
@@ -87,7 +83,6 @@ export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, b
   let xMax = multipolygons.bounds3857.northEast.x
   let yMax = multipolygons.bounds3857.northEast.y
 
-
   const pairMin = geometry.webMercatorToLeaflet(xMin, yMin, FACTOR)
   const pairMax = geometry.webMercatorToLeaflet(xMax, yMax, FACTOR)
 
@@ -100,11 +95,6 @@ export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, b
   const xMaxLeaflet = Math.round(pairMax.x)
   const yMaxLeaflet = Math.round(pairMax.y)
 
-
-  console.log('ORIGINAL', yMin, yMax, xMin, xMax)
-  console.log('MIN', pairMin)
-  console.log('MAX', pairMax)
-
   const svg = `
     <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
           style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
@@ -116,11 +106,14 @@ export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, b
 
   return {
     svg,
-    bounds: {
-      xMin, xMax, yMin, yMax,
-    }
+    bounds3857: multipolygons.bounds3857
+    // bounds: {
+    //   xMin, xMax, yMin, yMax,
+    // }
   }
 }
+
+
 /*
 export function createSVG2(multipolygons: MultipolygonData[]): {svg: string, bounds: any} {
   let elements: any[] = []
@@ -261,30 +254,30 @@ function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
 }
 */
 
-function buildSVGPolygon(pathData: any[], coordinateArray: [number, number][]) {
-  coordinateArray.forEach((point, i) => {
-    let suffix = i > 0 ? 'L' : 'M'
-    const generatedPoint = `${suffix} ${point[0]} ${point[1]}`
-    pathData.push(generatedPoint)
-  })
+// function buildSVGPolygon(pathData: any[], coordinateArray: [number, number][]) {
+//   coordinateArray.forEach((point, i) => {
+//     let suffix = i > 0 ? 'L' : 'M'
+//     const generatedPoint = `${suffix} ${point[0]} ${point[1]}`
+//     pathData.push(generatedPoint)
+//   })
 
-  if (pathData.length > 0) {
-    pathData.push('z') // svgz
-  }
+//   if (pathData.length > 0) {
+//     pathData.push('z') // svgz
+//   }
 
-  return pathData
-}
+//   return pathData
+// }
 
-function getOuterBoundary(polygon: any) {
-  console.log('GET OUTER BOUNDARY__', polygon)
-  return polygon.lineStrings[0]
-}
+// function getOuterBoundary(polygon: any) {
+//   console.log('GET OUTER BOUNDARY__', polygon)
+//   return polygon.lineStrings[0]
+// }
 
-/**
-* [getInnerBoundary description]
-* @return {type} [description]
-*/
-function getInnerBoundary(polygon: any) {
-  console.log('GET INNER BOUNDARY__', polygon)
-  return polygon.lineStrings.slice(1)
-}
+// /**
+// * [getInnerBoundary description]
+// * @return {type} [description]
+// */
+// function getInnerBoundary(polygon: any) {
+//   console.log('GET INNER BOUNDARY__', polygon)
+//   return polygon.lineStrings.slice(1)
+// }
