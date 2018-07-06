@@ -1,6 +1,6 @@
 /// <reference path='../../node_modules/@types/googlemaps/index.d.ts' />
 
-import * as svgUtil from './svgUtil'
+import * as svg from './svg'
 import {geometry} from '@targomo/core'
 import { MultipolygonData } from './types';
 import { ProjectedMultiPolygon } from './projectedPolygon';
@@ -78,7 +78,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     // console.log('THIS', this.imageElement)
     const now = new Date().getTime()
-    const result = svgUtil.createSVG(projectedMultiPolygon)
+    const result = svg.render(projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result.svg

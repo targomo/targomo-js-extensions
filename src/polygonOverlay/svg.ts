@@ -35,7 +35,7 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function createSVG(multipolygons: ProjectedMultiPolygon): {svg: string, bounds3857: ProjectedBounds} {
+export function render(multipolygons: ProjectedMultiPolygon): {svg: string, bounds3857: ProjectedBounds} {
   const elements: any[] = []
 
   function buildSVGPolygonInner(pathData: any[], points: ProjectedPoint[]) {
