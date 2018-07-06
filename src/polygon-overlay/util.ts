@@ -134,10 +134,10 @@ function buildSVGPolygon(pathData: any, coordinateArray: any, options: any) {
   console.log('CLIPPED ARRAY-2', clippedArray)
 
   for (let i = 0; i < clippedArray.length; i++) {
-    point = r360Point(clippedArray[i][0], clippedArray[i][1])
-    // point = polygonUtil.subtract(r360Point(clippedArray[i][0], clippedArray[i][1]),
-    //                                     options.pixelOrigin.x + options.offset.x,
-    //                                     options.pixelOrigin.y + options.offset.y)
+    // point = r360Point(clippedArray[i][0], clippedArray[i][1])
+    point = polygonUtil.subtract(r360Point(clippedArray[i][0], clippedArray[i][1]),
+                                        options.pixelOrigin.x + 0,
+                                        options.pixelOrigin.y + 0)
 
     pathData.push( i > 0 ? polygonUtil.buildPath(point, 'L') : polygonUtil.buildPath(point, 'M'))
     lastPoint = point;
@@ -271,4 +271,70 @@ function parseLatLonArray(latlngs: any[]) {
   }
 
   return coordinates;
+}
+
+
+
+export function polygonToSVGClassic(r360: any, map: google.maps.Map, multipolygons: any[]) {
+  let inverse = false
+  let color   = 'black' // multiPolygon.getColor && multiPolygon.getColor()
+  let strokeWidth = 5
+
+  let options = {
+    scale: Math.pow(2, map.getZoom()) * 256,
+    tolerance: 0,
+    color             : inverse ? color : 'black',
+    opacity           : inverse ? 1 : 1, // multiPolygon.getOpacity(),
+    strokeWidth       : strokeWidth,
+    bounds: getMapPixelBounds(map),
+    pixelOrigin: getPixelOrigin(map),
+}
+
+console.log('OPTIONS', options)
+
+    const createSvgDataLocal = function(polygon: any) {
+
+    const svg = r360.SvgUtil.createSvgData(polygon, {
+        bounds      : r360.PolygonUtil.extendBounds(getMapPixelBounds(map), 15, 15),
+        scale       : Math.pow(2, map.getZoom()) * 256,
+        tolerance   : 15,
+        pixelOrigin : getPixelOrigin(map),
+        offset      : {x: 0, y: 0}
+    });
+
+    return svg;
+  };
+
+  let elements: any[] = []
+  multipolygons.forEach(multiPolygon => {
+    let svgData = multiPolygon.polygons.map((item: any) => createSvgDataLocal(item))
+
+    if (svgData.length != 0) {
+      elements.push(createGElement(svgData, options))
+    }
+  })
+
+  let optionsSvg = {
+    id                : 'dfdfgdfgdf',
+    offset            : {x: 0, y: 0},
+    svgHeight         : 400,
+    svgWidth          : 400,
+    backgroundColor   : 'white',
+    backgroundOpacity : 1,
+    opacity           : 1,
+    strokeWidth       : 5,
+}
+
+
+
+// add the svg string to the container
+  // return r360.SvgUtil.getNormalSvgElement(elements, optionsSvg)
+  // tslint:disable-next-line:max-line-length
+  return `
+    <svg  height=500 width=1100
+          style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd' xmlns='http://www.w3.org/2000/svg'>
+          ${elements.join('\n')}
+    </svg>`
+
+  // return elements
 }

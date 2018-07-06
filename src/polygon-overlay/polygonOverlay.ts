@@ -1,6 +1,7 @@
 /// <reference path='../../node_modules/@types/googlemaps/index.d.ts' />
 
-import {polygonToSVG} from './util'
+import {polygonToSVG, polygonToSVGClassic} from './util'
+import * as svgUtil from './svgUtil'
 
 export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
@@ -15,8 +16,8 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     // test
     this.dataBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(60.626, 25.285),
-      new google.maps.LatLng(60.627, 25.29)
+      new google.maps.LatLng(52.525595, 13.393085),
+      new google.maps.LatLng(52.535595, 13.43085)
     )
   }
 
@@ -38,10 +39,12 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   }
 
   onAdd() {
+    console.log('ON ADD')
     const div = document.createElement('div')
     div.style.borderStyle = 'none'
     div.style.borderWidth = '0px'
     div.style.position = 'absolute'
+    div.style.opacity = '0.7'
 
     const img = document.createElement('img')
     img.src = this.data
@@ -65,8 +68,8 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   setData(multipolygon: any[]) {
     /// Testing
     this.dataBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(60.626, 25.285),
-      new google.maps.LatLng(60.627, 25.29)
+      new google.maps.LatLng(52.525595, 13.393085),
+      new google.maps.LatLng(52.535595, 13.43085)
     )
 
     const elements = polygonToSVG(this.getMap() as any, multipolygon)
@@ -81,6 +84,30 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     // data:image/svg+xml;charset=UTF-8,
 
     // document.body.appendChild()
-    document.write(svg) /// test
+    // document.write(svg) /// test
+  }
+
+  setDataClassic(r360: any, multipolygon: any[]) {
+    console.log('THIS', this.imageElement)
+    const result =  polygonToSVGClassic(r360, this.getMap() as any, multipolygon)
+    this.imageElement.src = 'data:image/svg+xml;base64,' + atob(result)
+
+    // document.write(result)
+
+    return result
+  }
+
+  setDataModern(multipolygon: any[]) {
+    console.log('THIS', this.imageElement)
+    const result = svgUtil.createSVG(multipolygon)
+    // this.imageElement.src = 'data:image/svg+xml;base64,' + atob(result)
+    // this.imageElement.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(result)
+
+    this.divElement.innerHTML = result
+
+    // console.log('RESULT', result)
+    // document.write(result)
+
+    return result
   }
 }
