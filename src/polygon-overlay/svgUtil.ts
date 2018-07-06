@@ -31,7 +31,7 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function createSVG(multipolygons: MultipolygonData[]): string {
+export function createSVG(multipolygons: MultipolygonData[]): {svg: string, bounds: any} {
   let elements: any[] = []
 
   let xMin: number = Infinity
@@ -113,12 +113,19 @@ export function createSVG(multipolygons: MultipolygonData[]): string {
   //   }
   // })
 
-  return `
+  const svg = `
     <svg  height="100%" width="100%" viewbox="${xMin} ${yMin} ${xMax - xMin} ${yMax - yMin}"
           style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
           xmlns='http://www.w3.org/2000/svg'>
           ${elements.join('\n')}
     </svg>`
+
+  return {
+    svg,
+    bounds: {
+      xMin, xMax, yMin, yMax,
+    }
+  }
 }
 
 

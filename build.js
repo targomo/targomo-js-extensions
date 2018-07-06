@@ -12,6 +12,13 @@ const contributors = require("./package.json").contributors || []
 const description = require("./package.json").description || ''
 const name = require("./package.json").name || ''
 
+const deps = Object.keys(require("./package.json").dependencies).concat(Object.keys(require("./package.json").peerDependencies || {}))
+const builtinImports = []
+const external = [...deps, ...builtinImports]
+const globals = {
+  '@targomo/core': 'tgm'
+}
+
 const production = !process.env.ROLLUP_WATCH;
 
 function getBanner() {
@@ -37,10 +44,12 @@ const defaultPlugins = [
 // Regular bundle
 rollup.rollup({
   input: './src/index.browser.ts',
+  external,
   context: 'window',
   plugins: defaultPlugins,
 }).then(bundle => {
   bundle.write({
+    globals,
     name: 'tgm.googlemaps',
     sourcemap: true,
     format: 'umd',
@@ -54,6 +63,7 @@ let bannercomment0 = false;
 // Minified bundle
 rollup.rollup({
   input: './src/index.browser.ts',
+  external,
   context: 'window',
   plugins: [
     ...defaultPlugins,
@@ -78,6 +88,7 @@ rollup.rollup({
   ],
 }).then(bundle => {
   bundle.write({
+    globals,
     name: 'tgm.googlemaps',
     sourcemap: true,
     format: 'umd',
