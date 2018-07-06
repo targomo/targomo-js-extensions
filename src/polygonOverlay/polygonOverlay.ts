@@ -3,6 +3,7 @@
 import * as svgUtil from './svgUtil'
 import {geometry} from '@targomo/core'
 import { MultipolygonData } from './types';
+import { ProjectedMultiPolygon } from './projectedPolygon';
 
 export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
@@ -50,6 +51,8 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   }
 
   setData(multipolygon: MultipolygonData[]) {
+    console.log('PROCESSED', new ProjectedMultiPolygon(multipolygon))
+
     // console.log('THIS', this.imageElement)
     const now = new Date().getTime()
     const result = svgUtil.createSVG(multipolygon)
@@ -64,6 +67,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
       new google.maps.LatLng(southWest.lat, southWest.lng),
       new google.maps.LatLng(northEast.lat, northEast.lng)
     )
+
 
     this.draw()
     return result

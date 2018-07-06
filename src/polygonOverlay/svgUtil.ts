@@ -1,24 +1,10 @@
 import { MultipolygonData, PolygonData } from './types'
-import { geometry } from '@targomo/core';
+import * as geometry from './geometry'
 
 const FACTOR = 10000000
 
 const COLORS: {[index: number]: string} = { // test
 }
-
-const transformEPSG3857 = ((a: number, b: number, c: number, d: number) => {
-  return function(x: number, y: number, scale: number = 1) {
-    x = scale * (a * x + b)
-    y = scale * (c * y + d)
-    return {x, y}
-  }
-}) (0.5 / (Math.PI), 0.5, -(0.5 / (Math.PI)), 0.5)
-////
-
-function webMercatorToLeaflet(x: number, y: number, scale: number = 1) {
-  return transformEPSG3857(x / 6378137, y / 6378137, scale);
-}
-
 
 // test
 ; ['#006837', '#39B54A', '#8CC63F', '#F7931E', '#F15A24', '#C1272D'].forEach((color, i) => {
@@ -66,7 +52,7 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
       yMin = Math.min(yMin, coordinate[1])
       yMax = Math.max(yMax, coordinate[1])
 
-      const pair = webMercatorToLeaflet(coordinate[0], coordinate[1], FACTOR)
+      const pair = geometry.webMercatorToLeaflet(coordinate[0], coordinate[1], FACTOR)
       coordinate[0] = Math.round(pair.x)
       coordinate[1] = Math.round(pair.y)
     })
@@ -110,6 +96,7 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
 
   multiPolygonResult.sort(function(a: any, b: any) { return b.travelTime - a.travelTime})
 
+  console.log('MULTI RESILT &&&&&&&', multiPolygonResult)
 
   multiPolygonResult.forEach(multiPolygon => {
     console.log('MULTIPOLYGON COLORS', COLORS)
@@ -135,8 +122,8 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
   //   }
   // })
 
-  const pairMin = webMercatorToLeaflet(xMin, yMin, FACTOR)
-  const pairMax = webMercatorToLeaflet(xMax, yMax, FACTOR)
+  const pairMin = geometry.webMercatorToLeaflet(xMin, yMin, FACTOR)
+  const pairMax = geometry.webMercatorToLeaflet(xMax, yMax, FACTOR)
 
   if (pairMax.y < pairMin.y) {
     [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
