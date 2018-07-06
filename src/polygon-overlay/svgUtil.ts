@@ -1,7 +1,22 @@
 import { MultipolygonData, PolygonData } from './types'
+import { geometry } from '@targomo/core';
 
 const COLORS: {[index: number]: string} = { // test
 }
+
+const transformEPSG3857 = ((a: number, b: number, c: number, d: number) => {
+  return function(x: number, y: number, scale: number = 1) {
+    x = scale * (a * x + b)
+    y = scale * (c * y + d)
+    return {x, y}
+  }
+}) (0.5 / (Math.PI), 0.5, -(0.5 / (Math.PI)), 0.5)
+////
+
+function webMercatorToLeaflet(x: number, y: number, scale: number = 1) {
+  return transformEPSG3857(x / 6378137, y / 6378137, scale);
+}
+
 
 // test
 ; ['#006837', '#39B54A', '#8CC63F', '#F7931E', '#F15A24', '#C1272D'].forEach((color, i) => {
@@ -42,11 +57,16 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
   let multiPolygonResult: any[] = []
 
   function parseLatLngArray(coordinates: [number, number][]) {
+
     coordinates.forEach(coordinate => {
       xMin = Math.min(xMin, coordinate[0])
       xMax = Math.max(xMax, coordinate[0])
       yMin = Math.min(yMin, coordinate[1])
       yMax = Math.max(yMax, coordinate[1])
+
+      const pair = webMercatorToLeaflet(coordinate[0], coordinate[1], 10000000)
+      coordinate[0] = Math.round(pair.x)
+      coordinate[1] = Math.round(pair.y)
     })
 
     return coordinates
@@ -113,12 +133,31 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
   //   }
   // })
 
+  const pairMin = webMercatorToLeaflet(xMin, yMin, 10000000)
+  const pairMax = webMercatorToLeaflet(xMax, yMax, 10000000)
+
+  if (pairMax.y < pairMin.y) {
+    [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
+  }
+
+  const xMinLeaflet = Math.round(pairMin.x)
+  const yMinLeaflet = Math.round(pairMin.y)
+  const xMaxLeaflet = Math.round(pairMax.x)
+  const yMaxLeaflet = Math.round(pairMax.y)
+
+
+  console.log('ORIGINAL', yMin, yMax, xMin, xMax)
+  console.log('MIN', pairMin)
+  console.log('MAX', pairMax)
+
   const svg = `
-    <svg  height="100%" width="100%" viewbox="${xMin} ${yMin} ${xMax - xMin} ${yMax - yMin}"
+    <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
           style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
           xmlns='http://www.w3.org/2000/svg'>
           ${elements.join('\n')}
     </svg>`
+
+  console.log('SVG', svg)
 
   return {
     svg,
@@ -147,6 +186,8 @@ function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
 
 function buildSVGPolygon(pathData: any[], coordinateArray: [number, number][]) {
   coordinateArray.forEach((point, i) => {
+    // console.log('p', geometry.webMercatorToLatLng({x: point[0], y: point[1]}, undefined))
+    // console.log('pp', webMercatorToLeaflet(point[0], point[1], 10000000))
     let suffix = i > 0 ? 'L' : 'M'
     const generatedPoint = `${suffix} ${point[0]} ${point[1]}`
     pathData.push(generatedPoint)
