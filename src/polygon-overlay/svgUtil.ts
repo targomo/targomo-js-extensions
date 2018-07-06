@@ -1,6 +1,8 @@
 import { MultipolygonData, PolygonData } from './types'
 import { geometry } from '@targomo/core';
 
+const FACTOR = 10000000
+
 const COLORS: {[index: number]: string} = { // test
 }
 
@@ -64,7 +66,7 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
       yMin = Math.min(yMin, coordinate[1])
       yMax = Math.max(yMax, coordinate[1])
 
-      const pair = webMercatorToLeaflet(coordinate[0], coordinate[1], 10000000)
+      const pair = webMercatorToLeaflet(coordinate[0], coordinate[1], FACTOR)
       coordinate[0] = Math.round(pair.x)
       coordinate[1] = Math.round(pair.y)
     })
@@ -133,8 +135,8 @@ export function createSVG(multipolygons: MultipolygonData[]): {svg: string, boun
   //   }
   // })
 
-  const pairMin = webMercatorToLeaflet(xMin, yMin, 10000000)
-  const pairMax = webMercatorToLeaflet(xMax, yMax, 10000000)
+  const pairMin = webMercatorToLeaflet(xMin, yMin, FACTOR)
+  const pairMax = webMercatorToLeaflet(xMax, yMax, FACTOR)
 
   if (pairMax.y < pairMin.y) {
     [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
@@ -186,8 +188,6 @@ function addPolygonToMultiPolygon(multiPolygons: any, polygon: any) {
 
 function buildSVGPolygon(pathData: any[], coordinateArray: [number, number][]) {
   coordinateArray.forEach((point, i) => {
-    // console.log('p', geometry.webMercatorToLatLng({x: point[0], y: point[1]}, undefined))
-    // console.log('pp', webMercatorToLeaflet(point[0], point[1], 10000000))
     let suffix = i > 0 ? 'L' : 'M'
     const generatedPoint = `${suffix} ${point[0]} ${point[1]}`
     pathData.push(generatedPoint)
