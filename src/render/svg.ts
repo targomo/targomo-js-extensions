@@ -35,15 +35,16 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function render(viewport: ProjectedBounds, zoomFactor: number, multipolygons: ProjectedMultiPolygon): string {
+export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds, 
+                       zoomFactor: number, multipolygons: ProjectedMultiPolygon): string {
   // let xMin = multipolygons.bounds3857.southWest.x
   // let yMin = multipolygons.bounds3857.southWest.y
   // let xMax = multipolygons.bounds3857.northEast.x
   // let yMax = multipolygons.bounds3857.northEast.y
 
   zoomFactor = Math.min(10000000, zoomFactor)
-  const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
-  const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)
+  const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
+  const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
 
   // const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
   // const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)

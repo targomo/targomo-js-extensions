@@ -114,17 +114,20 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     }
 
     const projectedMultiPolygon = this.model
+    const newBounds = bounds.modifyIntersect(projectedMultiPolygon.bounds3857)
 
     const now = new Date().getTime()
     const zoomFactor = Math.pow(2, this.map.getZoom()) * 256
     console.log('ZOOM FACTOR', zoomFactor)
-    const result = svg.render(bounds, zoomFactor, projectedMultiPolygon)
+    const result = svg.render(bounds, newBounds, zoomFactor, projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result
 
-    const southWest = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.southWest, undefined)
-    const northEast = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.northEast, undefined)
+    // const southWest = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.southWest, undefined)
+    // const northEast = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.northEast, undefined)
+    const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
+    const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
 
     this.dataBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(southWest.lat, southWest.lng),
