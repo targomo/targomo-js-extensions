@@ -11,6 +11,8 @@ import { ProjectedMultiPolygon } from './projectedPolygon';
 export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
   private dataBounds: google.maps.LatLngBounds
+  private model: ProjectedMultiPolygon
+  private renderTimeout: any = null
 
   /**
    *
@@ -26,6 +28,14 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    *
    */
   draw() {
+    console.log('DRAW')
+    this.resize()
+
+    clearTimeout(this.renderTimeout)
+    this.renderTimeout = setTimeout(() => this.render(), 50)
+  }
+
+  private resize() {
     if (!this.dataBounds) {
       return
     }
@@ -72,11 +82,21 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    */
   setData(multipolygon: MultipolygonData[]) {
     const now2 = new Date().getTime()
-    const projectedMultiPolygon = new ProjectedMultiPolygon(multipolygon)
-    console.log('PROCESSED', projectedMultiPolygon)
+    this.model = new ProjectedMultiPolygon(multipolygon)
     console.log('**** PRE PROCESSING TIME ****', new Date().getTime() - now2)
 
-    // console.log('THIS', this.imageElement)
+    this.render()
+  }
+
+  private render() {
+    console.log('RENDER')
+
+    if (!this.model) {
+      return
+    }
+
+    const projectedMultiPolygon = this.model
+
     const now = new Date().getTime()
     const result = svg.render(projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
@@ -91,8 +111,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
       new google.maps.LatLng(northEast.lat, northEast.lng)
     )
 
-
-    this.draw()
-    return result
+    this.resize()
   }
 }
