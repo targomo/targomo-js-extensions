@@ -35,6 +35,14 @@ export class ProjectedBounds {
     return this
   }
 
+  modifyExpand(bounds: ProjectedBounds) {
+    this.southWest.x = Math.min(this.southWest.x, bounds.southWest.x)
+    this.northEast.x = Math.max(this.northEast.x, bounds.northEast.x)
+    this.southWest.y = Math.min(this.southWest.y, bounds.southWest.y)
+    this.northEast.y = Math.max(this.northEast.y, bounds.northEast.y)
+    return this
+  }
+
   contains(bounds: ProjectedBounds) {
     return (
       this.northEast.x >= bounds.northEast.x &&

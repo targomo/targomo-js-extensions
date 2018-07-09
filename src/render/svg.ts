@@ -2,8 +2,10 @@ import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
 
+let idCounter = 0
+
 export interface RenderOptions {
-  inverted?: boolean
+  inverse?: boolean
   colors?: {[edgeWeight: number]: string}
   opacity?: number
   strokeWidth?: number
@@ -34,7 +36,7 @@ function renderPath(svgData: string, elementOptions: {opacity: number, color: st
 }
 
 function renderElement(children: any[], width: number, height: number) {
-  // 0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}  
+  // 0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}
   return  `
     <svg  height="100%" width="100%" viewbox="0 0 ${width} ${height}"
           style='opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
@@ -44,7 +46,7 @@ function renderElement(children: any[], width: number, height: number) {
 }
 
 function renderInverseElement(children: any[], width: number, height: number) {
-  let id = 'sdfsdfsdfsdf' // FIXME
+  let id = 'tgm:inverse:' + idCounter++
   const svgFrame = `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} z`
   const frame = `<path style='mask: url(#mask_${id})' d='${svgFrame}'/>`
   const newSvg = `
@@ -161,18 +163,12 @@ export function render(viewport: ProjectedBounds,
     }
   })
 
-  // const svg = `
-  //   <svg  height="100%" width="100%" viewbox="${0} ${0} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
-  //         style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
-  //         xmlns='http://www.w3.org/2000/svg'>
-  //         ${elements.join('\n')}
-  //   </svg>`
-
-  // console.log('SVG', svg)
-
   let width = xMaxLeaflet - xMinLeaflet
   let height = yMaxLeaflet - yMinLeaflet
-  // return renderElement(children, `0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}`)
-  // return renderElement(children, width, height)
-  return renderInverseElement(children, width, height)
+
+  if (options.inverse) {
+    return renderInverseElement(children, width, height)
+  } else {
+    return renderElement(children, width, height)
+  }
 }
