@@ -12,18 +12,11 @@ const COLORS: {[index: number]: string} = { // test
   COLORS[(i + 1) * 300] = color
 })
 
-const generateId = (() => {
-  let initial = 0
-
-  return () => 'TGM:' + initial++
-}) ()
-
-function createGElement(svgData: string, elementOptions: {opacity: number, color: string, strokeWidth: number}) {
-  let randomId       = generateId()
+function renderPath(svgData: string, elementOptions: {opacity: number, color: string, strokeWidth: number}) {
   let initialOpacity = elementOptions.opacity
 
   return `
-    <g id="${randomId}" style='opacity: ${initialOpacity}'>
+    <g style='opacity: ${initialOpacity}'>
       <path style='stroke: ${elementOptions.color};
             fill: ${elementOptions.color};
             stroke-opacity: 1;
@@ -35,19 +28,11 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds, 
+export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
                        zoomFactor: number, multipolygons: ProjectedMultiPolygon): string {
-  // let xMin = multipolygons.bounds3857.southWest.x
-  // let yMin = multipolygons.bounds3857.southWest.y
-  // let xMax = multipolygons.bounds3857.northEast.x
-  // let yMax = multipolygons.bounds3857.northEast.y
-
   zoomFactor = Math.min(10000000, zoomFactor)
   const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
-
-  // const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
-  // const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)
 
   if (pairMax.y < pairMin.y) {
     [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
@@ -59,8 +44,6 @@ export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
   const yMaxLeaflet = Math.ceil(pairMax.y)
 
   const elements: any[] = []
-
-
 
   let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet)
   let projectedViewportLineString = projectedViewport.toLineString()
@@ -102,7 +85,7 @@ export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
   multipolygons.forEach((travelTime, polygons) => {
     const svgData = polygons.map(item => renderPolygon(item).join(' ')).join(' ')
     if (svgData.length != 0) {
-      elements.push(createGElement(svgData, {
+      elements.push(renderPath(svgData, {
         opacity: 1,
         strokeWidth: 5,
         color: COLORS[travelTime]

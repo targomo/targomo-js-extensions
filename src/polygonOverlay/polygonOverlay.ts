@@ -81,17 +81,12 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    * @param multipolygon
    */
   setData(multipolygon: MultipolygonData[]) {
-    const now2 = new Date().getTime()
     this.model = new ProjectedMultiPolygon(multipolygon)
-    console.log('**** PRE PROCESSING TIME ****', new Date().getTime() - now2)
-
     this.render()
   }
 
   private getBoundingBox() {
     const bounds = this.map.getBounds()
-
-    console.log('BIOUNDS', bounds.getNorthEast().lng(), bounds.getSouthWest().lng())
 
     return new ProjectedBounds({
       northEast: geometry.latLngToWebMercator({
@@ -107,7 +102,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
   private render() {
     const bounds = this.getBoundingBox()
-    console.log('RENDER', bounds)
 
     if (!this.model) {
       return
@@ -124,8 +118,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     this.divElement.innerHTML = result
 
-    // const southWest = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.southWest, undefined)
-    // const northEast = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.northEast, undefined)
     const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
     const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
 
