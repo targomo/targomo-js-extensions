@@ -101,7 +101,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   }
 
   private render() {
-    const bounds = this.getBoundingBox()
+    const bounds = this.getBoundingBox().growOutwards()
 
     if (!this.model) {
       return

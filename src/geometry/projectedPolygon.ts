@@ -53,6 +53,18 @@ export class ProjectedBounds {
     )
   }
 
+  growOutwards(factor: number = 1) {
+    let diffX = (this.northEast.x - this.southWest.x) * factor
+    let diffY = (this.northEast.y - this.southWest.y) * factor
+
+    this.northEast.x += diffX
+    this.northEast.y += diffY
+    this.southWest.x -= diffX
+    this.southWest.y -= diffY
+
+    return this
+  }
+
   toLineString() {
     return [
       // new ProjectedPoint(this.southWest.x, this.southWest.y),
