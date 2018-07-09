@@ -2,7 +2,12 @@ import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
 
-// const FACTOR = 10000000
+export interface RenderOptions {
+  inverted?: boolean
+  colors?: {[edgeWeight: number]: string}
+  opacity?: number
+  strokeWidth?: number
+}
 
 const COLORS: {[index: number]: string} = { // test
 }
@@ -28,14 +33,58 @@ function renderPath(svgData: string, elementOptions: {opacity: number, color: st
   `
 }
 
-function renderElement(children: any[], viewbox: string) {
+function renderElement(children: any[], width: number, height: number) {
+  // 0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}  
   return  `
-    <svg  height="100%" width="100%" viewbox="${viewbox}"
+    <svg  height="100%" width="100%" viewbox="0 0 ${width} ${height}"
           style='opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
           xmlns='http://www.w3.org/2000/svg'>
           ${children.join('\n')}
     </svg>`
 }
+
+function renderInverseElement(children: any[], width: number, height: number) {
+  let id = 'sdfsdfsdfsdf' // FIXME
+  const svgFrame = `M 0 0 L ${width} 0 L ${width} ${height} L 0 ${height} z`
+  const frame = `<path style='mask: url(#mask_${id})' d='${svgFrame}'/>`
+  const newSvg = `
+    <defs>
+      <mask id='mask_${id}'>
+          <path style='fill-opacity:1; stroke: white; fill:white;' d='${svgFrame}'/>"
+          ${children.join('\n')}
+      </mask>
+    </defs>
+  `
+
+  return  `
+    <svg  height="100%" width="100%" viewbox="0 0 ${width} ${height}"
+          style='opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
+          xmlns='http://www.w3.org/2000/svg'>
+          ${frame}
+          ${newSvg}
+    </svg>`
+}
+// getInverseSvgElement: function(gElements, options){
+
+//   var svgFrame = r360.PolygonUtil.getSvgFrame(options.svgWidth, options.svgHeight);
+
+//   var svgStart = "<div id=svg_"+ options.id + " style='" + r360.Util.getTranslation(options.offset) + ";''><svg"  +
+//                       " height=" + options.svgHeight +
+//                       " width="  + options.svgWidth  +
+//                       " style='fill:" + options.backgroundColor + " ; opacity: "+ options.backgroundOpacity + "; stroke-width: " + options.strokeWidth + "; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd' xmlns='http://www.w3.org/2000/svg'>"
+//   var svgEnd   = "</svg></div>";
+
+//   var newSvg = "<defs>"+
+//                   "<mask id='mask_" + options.id + "'>"+
+//                       "<path style='fill-opacity:1;stroke: white; fill:white;' d='" + svgFrame.toString().replace(/\,/g, ' ') + "'/>"+
+//                           gElements.join('') +
+//                   "</mask>"+
+//               "</defs>";
+
+//   var frame = "<path style='mask: url(#mask_" + options.id + ")' d='" + svgFrame.toString().replace(/\,/g, ' ') + "'/>";
+
+//   return svgStart + frame + newSvg + svgEnd;
+// },
 
 /**
  *
@@ -47,7 +96,9 @@ function renderElement(children: any[], viewbox: string) {
 export function render(viewport: ProjectedBounds,
                        bounds3857: ProjectedBounds,
                        zoomFactor: number,
-                       multipolygons: ProjectedMultiPolygon): string {
+                       multipolygons: ProjectedMultiPolygon,
+                       options: any
+                      ): string {
   zoomFactor = Math.min(10000000, zoomFactor)
   const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
@@ -119,5 +170,9 @@ export function render(viewport: ProjectedBounds,
 
   // console.log('SVG', svg)
 
-  return renderElement(children, `0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}`)
+  let width = xMaxLeaflet - xMinLeaflet
+  let height = yMaxLeaflet - yMinLeaflet
+  // return renderElement(children, `0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}`)
+  // return renderElement(children, width, height)
+  return renderInverseElement(children, width, height)
 }
