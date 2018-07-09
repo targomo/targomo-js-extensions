@@ -1,6 +1,6 @@
-import * as geometry from './projection'
-import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from './projectedPolygon';
-import * as simplify from './clip'
+import * as geometry from '../geometry/projection'
+import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
+import * as simplify from '../geometry/clip'
 
 // const FACTOR = 10000000
 
@@ -41,8 +41,12 @@ export function render(viewport: ProjectedBounds, zoomFactor: number, multipolyg
   // let xMax = multipolygons.bounds3857.northEast.x
   // let yMax = multipolygons.bounds3857.northEast.y
 
+  zoomFactor = Math.min(10000000, zoomFactor)
   const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)
+
+  // const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
+  // const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)
 
   if (pairMax.y < pairMin.y) {
     [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
@@ -55,18 +59,20 @@ export function render(viewport: ProjectedBounds, zoomFactor: number, multipolyg
 
   const elements: any[] = []
 
-  zoomFactor = Math.min(10000000, zoomFactor)
 
 
-  let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet).toLineString()
+  let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet)
+  let projectedViewportLineString = projectedViewport.toLineString()
   console.log('CLIP BY', projectedViewport)
 
-  function buildSVGPolygonInner(pathData: any[], points: ProjectedPoint[]) {
-    points = simplify.clip(points, projectedViewport)
+  function renderLineString(pathData: any[], points: ProjectedPoint[]) {
+    points = simplify.clip(points, projectedViewportLineString)
 
     points.forEach((point, i) => {
       let suffix = i > 0 ? 'L' : 'M'
-      const generatedPoint = `${suffix} ${Math.round(point.x * zoomFactor) - xMinLeaflet} ${Math.round(point.y * zoomFactor) - yMinLeaflet}`
+      const x = Math.round((point.x) * zoomFactor) - xMinLeaflet
+      const y = Math.round((point.y) * zoomFactor) - yMinLeaflet
+      const generatedPoint = `${suffix} ${x} ${y}`
       pathData.push(generatedPoint)
     })
 
@@ -77,14 +83,14 @@ export function render(viewport: ProjectedBounds, zoomFactor: number, multipolyg
     return pathData
   }
 
-  function createSvgDataLocal(polygon: ProjectedPolygon) {
+  function renderPolygon(polygon: ProjectedPolygon) {
     let pathData: any = []
 
     if (viewport.intersects(polygon.bounds3857)) {
-      buildSVGPolygonInner(pathData, polygon.getOuterBoundary().points)
+      renderLineString(pathData, polygon.getOuterBoundary().points)
       polygon.getInnerBoundary().forEach(innerBoundary => {
         if (viewport.intersects(innerBoundary.bounds3857)) {
-          buildSVGPolygonInner(pathData, innerBoundary.points)
+          renderLineString(pathData, innerBoundary.points)
         }
       })
     }
@@ -93,7 +99,7 @@ export function render(viewport: ProjectedBounds, zoomFactor: number, multipolyg
   }
 
   multipolygons.forEach((travelTime, polygons) => {
-    const svgData = polygons.map(item => createSvgDataLocal(item).join(' ')).join(' ')
+    const svgData = polygons.map(item => renderPolygon(item).join(' ')).join(' ')
     if (svgData.length != 0) {
       elements.push(createGElement(svgData, {
         opacity: 1,
