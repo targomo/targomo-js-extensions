@@ -38,14 +38,18 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
 export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiPolygon): {svg: string, bounds3857: ProjectedBounds} {
   const elements: any[] = []
 
-  const projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet).toLineString()
+  let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet).toLineString()
+  projectedViewport = projectedViewport.map((point, i) => new ProjectedPoint(Math.round(point.x * FACTOR), Math.round(point.y * FACTOR)))
+  console.log('CLIP BY', projectedViewport)
 
   function buildSVGPolygonInner(pathData: any[], points: ProjectedPoint[]) {
+    points = points.map((point, i) => new ProjectedPoint(Math.round(point.x * FACTOR), Math.round(point.y * FACTOR)))
     points = simplify.clip(points, projectedViewport)
 
     points.forEach((point, i) => {
       let suffix = i > 0 ? 'L' : 'M'
-      const generatedPoint = `${suffix} ${point.x * FACTOR} ${point.y * FACTOR}`
+      // const generatedPoint = `${suffix} ${point.x * FACTOR} ${point.y * FACTOR}`
+      const generatedPoint = `${suffix} ${point.x} ${point.y}`
       pathData.push(generatedPoint)
     })
 

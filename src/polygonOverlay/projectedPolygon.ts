@@ -54,10 +54,14 @@ export class ProjectedBounds {
 
   toLineString() {
     return [
-      new ProjectedPoint(this.southWest.x, this.southWest.y),
-      new ProjectedPoint(this.northEast.x, this.southWest.y),
-      new ProjectedPoint(this.northEast.x, this.northEast.y),
+      // new ProjectedPoint(this.southWest.x, this.southWest.y),
+      // new ProjectedPoint(this.northEast.x, this.southWest.y),
+      // new ProjectedPoint(this.northEast.x, this.northEast.y),
+      // new ProjectedPoint(this.southWest.x, this.northEast.y),
       new ProjectedPoint(this.southWest.x, this.northEast.y),
+      new ProjectedPoint(this.northEast.x, this.northEast.y),
+      new ProjectedPoint(this.northEast.x, this.southWest.y),
+      new ProjectedPoint(this.southWest.x, this.southWest.y),
     ]
   }
 

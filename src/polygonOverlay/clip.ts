@@ -1,12 +1,9 @@
 import { ProjectedPoint } from './projectedPolygon'
 
-export function clip(clipPolygon: ProjectedPoint[], subjectPolygon: ProjectedPoint[]) {
+export function clip(subjectPolygon: ProjectedPoint[], clipPolygon: ProjectedPoint[]) {
   let cp1: ProjectedPoint, cp2: ProjectedPoint, s: ProjectedPoint, e: ProjectedPoint
 
   let inside = function(p: ProjectedPoint) {
-    console.log('CP2', cp2, 'CP1', cp1, 'P', p)
-    console.log('INSIDE', (cp2.x - cp1.x) * (p.y - cp1.y), (cp2.y - cp1.y) * (p.x - cp1.x))
-    console.log('INSIDE STEPS', (cp2.x - cp1.x), (p.y - cp1.y), (cp2.y - cp1.y), (p.x - cp1.x))
     return (cp2.x - cp1.x) * (p.y - cp1.y) > (cp2.y - cp1.y) * (p.x - cp1.x)
   }
 
@@ -32,17 +29,14 @@ export function clip(clipPolygon: ProjectedPoint[], subjectPolygon: ProjectedPoi
       s = inputList[inputList.length - 1] // last on the input list
 
       for (let i in inputList) {
-          e = inputList[i]
+        e = inputList[i]
 
           if (inside(e)) {
-            console.log('YES-1')
             if (!inside(s)) {
-              console.log('YES-2')
               outputList.push(intersection())
             }
             outputList.push(e)
           } else if (inside(s)) {
-            console.log('YES-3')
             outputList.push(intersection())
           }
           s = e
