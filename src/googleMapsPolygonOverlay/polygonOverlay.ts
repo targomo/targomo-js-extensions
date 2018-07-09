@@ -6,10 +6,12 @@ import { MultipolygonData } from '../geometry/types';
 import { ProjectedMultiPolygon, ProjectedBounds } from '../geometry/projectedPolygon';
 import { MinMaxSchedule } from '../util/minMaxSchedule';
 
+
+
 /**
  *
  */
-export class TgmPolygonOverlay extends google.maps.OverlayView {
+export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
   private dataBounds: google.maps.LatLngBounds
   private model: ProjectedMultiPolygon
@@ -33,14 +35,11 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    */
   draw() {
     this.resize()
-
-    // clearTimeout(this.renderTimeout)
-    // this.renderTimeout = setTimeout(() => this.render(), 50)
     this.renderTimeout.schedule(() => this.render())
   }
 
   private resize() {
-    if (!this.dataBounds) {
+    if (!this.dataBounds || !this.divElement) {
       return
     }
 

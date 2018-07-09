@@ -1,6 +1,9 @@
 import { MultipolygonData, PolygonData } from './types'
 import * as geometry from './projection'
 
+/**
+ *
+ */
 export class ProjectedBounds {
   southWest: ProjectedPoint = new ProjectedPoint(Infinity, Infinity)
   northEast: ProjectedPoint = new ProjectedPoint(-Infinity, -Infinity)
@@ -94,11 +97,17 @@ export class ProjectedBounds {
   }
 }
 
+/**
+ *
+ */
 export class ProjectedPoint {
   constructor(public x: number, public y: number) {
   }
 }
 
+/**
+ *
+ */
 export class ProjectedLineString {
   points: ProjectedPoint[]
   bounds3857: ProjectedBounds = new ProjectedBounds()
@@ -113,6 +122,9 @@ export class ProjectedLineString {
   }
 }
 
+/**
+ *
+ */
 export class ProjectedPolygon {
   travelTime: number
   area: number
@@ -144,6 +156,9 @@ export class ProjectedPolygon {
   }
 }
 
+/**
+ *
+ */
 export class ProjectedMultiPolygon {
   polygons: {[travelTime: number]: ProjectedPolygon[]} = {}
   bounds3857: ProjectedBounds = new ProjectedBounds()
