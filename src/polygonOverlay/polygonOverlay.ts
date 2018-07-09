@@ -4,6 +4,7 @@ import * as svg from '../render/svg'
 import {geometry} from '@targomo/core'
 import { MultipolygonData } from '../geometry/types';
 import { ProjectedMultiPolygon, ProjectedBounds } from '../geometry/projectedPolygon';
+import { MinMaxSchedule } from '../util/minMaxSchedule';
 
 /**
  *
@@ -12,7 +13,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   private divElement: HTMLDivElement
   private dataBounds: google.maps.LatLngBounds
   private model: ProjectedMultiPolygon
-  private renderTimeout: any = null
+  private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
 
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
@@ -31,11 +32,11 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    *
    */
   draw() {
-    console.log('DRAW')
     this.resize()
 
-    clearTimeout(this.renderTimeout)
-    this.renderTimeout = setTimeout(() => this.render(), 50)
+    // clearTimeout(this.renderTimeout)
+    // this.renderTimeout = setTimeout(() => this.render(), 50)
+    this.renderTimeout.schedule(() => this.render())
   }
 
   private resize() {
@@ -58,7 +59,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    *
    */
   onAdd() {
-    console.log('ON ADD')
     const div = document.createElement('div')
     div.style.borderStyle = 'none'
     div.style.borderWidth = '0px'
@@ -131,7 +131,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     const now = new Date().getTime()
     const zoomFactor = Math.pow(2, this.map.getZoom()) * 256
-    console.log('ZOOM FACTOR', zoomFactor)
     const result = svg.render(bounds, newBounds, zoomFactor, projectedMultiPolygon, {
       inverse
     })
@@ -141,9 +140,6 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
 
     const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
     const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
-
-    // console.log("NEW BOUNDS", northEast)
-    // console.log("NEW BOUNDS-map", this.map.getBounds().getNorthEast().lng(), this.map.getBounds().getNorthEast().lat())
 
     this.dataBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(southWest.lat, southWest.lng),

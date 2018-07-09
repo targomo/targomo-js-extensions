@@ -1,5 +1,8 @@
 import { ProjectedPoint } from './projectedPolygon'
 
+/**
+ * [clip clipping like sutherland http://rosettacode.org/wiki/Sutherland-Hodgman_polygon_clipping#JavaScript]
+ */
 export function clip(subjectPolygon: ProjectedPoint[], clipPolygon: ProjectedPoint[]) {
   let cp1: ProjectedPoint, cp2: ProjectedPoint, s: ProjectedPoint, e: ProjectedPoint
 

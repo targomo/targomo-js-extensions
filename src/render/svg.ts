@@ -66,27 +66,6 @@ function renderInverseElement(children: any[], width: number, height: number) {
           ${newSvg}
     </svg>`
 }
-// getInverseSvgElement: function(gElements, options){
-
-//   var svgFrame = r360.PolygonUtil.getSvgFrame(options.svgWidth, options.svgHeight);
-
-//   var svgStart = "<div id=svg_"+ options.id + " style='" + r360.Util.getTranslation(options.offset) + ";''><svg"  +
-//                       " height=" + options.svgHeight +
-//                       " width="  + options.svgWidth  +
-//                       " style='fill:" + options.backgroundColor + " ; opacity: "+ options.backgroundOpacity + "; stroke-width: " + options.strokeWidth + "; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd' xmlns='http://www.w3.org/2000/svg'>"
-//   var svgEnd   = "</svg></div>";
-
-//   var newSvg = "<defs>"+
-//                   "<mask id='mask_" + options.id + "'>"+
-//                       "<path style='fill-opacity:1;stroke: white; fill:white;' d='" + svgFrame.toString().replace(/\,/g, ' ') + "'/>"+
-//                           gElements.join('') +
-//                   "</mask>"+
-//               "</defs>";
-
-//   var frame = "<path style='mask: url(#mask_" + options.id + ")' d='" + svgFrame.toString().replace(/\,/g, ' ') + "'/>";
-
-//   return svgStart + frame + newSvg + svgEnd;
-// },
 
 /**
  *
