@@ -3,7 +3,7 @@
 import * as svg from './svg'
 import {geometry} from '@targomo/core'
 import { MultipolygonData } from './types';
-import { ProjectedMultiPolygon } from './projectedPolygon';
+import { ProjectedMultiPolygon, ProjectedBounds } from './projectedPolygon';
 
 /**
  *
@@ -18,7 +18,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
    *
    * @param map
    */
-  constructor(map: google.maps.Map) {
+  constructor(private map: google.maps.Map) {
     super()
 
     this.setMap(map)
@@ -88,8 +88,26 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     this.render()
   }
 
+  private getBoundingBox() {
+    const bounds = this.map.getBounds()
+
+    console.log('BIOUNDS', bounds.getNorthEast().lng(), bounds.getSouthWest().lng())
+
+    return new ProjectedBounds({
+      northEast: geometry.latLngToWebMercator({
+        lng: bounds.getNorthEast().lng(),
+        lat: bounds.getNorthEast().lat(),
+      }),
+      southWest: geometry.latLngToWebMercator({
+        lng: bounds.getSouthWest().lng(),
+        lat: bounds.getSouthWest().lat(),
+      })
+    })
+  }
+
   private render() {
-    console.log('RENDER')
+    const bounds = this.getBoundingBox()
+    console.log('RENDER', bounds)
 
     if (!this.model) {
       return
@@ -98,7 +116,7 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     const projectedMultiPolygon = this.model
 
     const now = new Date().getTime()
-    const result = svg.render(projectedMultiPolygon)
+    const result = svg.render(bounds, projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result.svg
