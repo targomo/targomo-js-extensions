@@ -28,8 +28,26 @@ function renderPath(svgData: string, elementOptions: {opacity: number, color: st
   `
 }
 
-export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
-                       zoomFactor: number, multipolygons: ProjectedMultiPolygon): string {
+function renderElement(children: any[], viewbox: string) {
+  return  `
+    <svg  height="100%" width="100%" viewbox="${viewbox}"
+          style='opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
+          xmlns='http://www.w3.org/2000/svg'>
+          ${children.join('\n')}
+    </svg>`
+}
+
+/**
+ *
+ * @param viewport
+ * @param bounds3857
+ * @param zoomFactor
+ * @param multipolygons
+ */
+export function render(viewport: ProjectedBounds,
+                       bounds3857: ProjectedBounds,
+                       zoomFactor: number,
+                       multipolygons: ProjectedMultiPolygon): string {
   zoomFactor = Math.min(10000000, zoomFactor)
   const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
@@ -43,11 +61,9 @@ export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
   const xMaxLeaflet = Math.ceil(pairMax.x)
   const yMaxLeaflet = Math.ceil(pairMax.y)
 
-  const elements: any[] = []
 
   let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet)
   let projectedViewportLineString = projectedViewport.toLineString()
-  console.log('CLIP BY', projectedViewport)
 
   function renderLineString(pathData: any[], points: ProjectedPoint[]) {
     points = simplify.clip(points, projectedViewportLineString)
@@ -82,10 +98,11 @@ export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
     return pathData
   }
 
+  const children: any[] = []
   multipolygons.forEach((travelTime, polygons) => {
     const svgData = polygons.map(item => renderPolygon(item).join(' ')).join(' ')
     if (svgData.length != 0) {
-      elements.push(renderPath(svgData, {
+      children.push(renderPath(svgData, {
         opacity: 1,
         strokeWidth: 5,
         color: COLORS[travelTime]
@@ -93,15 +110,14 @@ export function render(viewport: ProjectedBounds, bounds3857: ProjectedBounds,
     }
   })
 
-  // <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
-  const svg = `
-    <svg  height="100%" width="100%" viewbox="${0} ${0} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
-          style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
-          xmlns='http://www.w3.org/2000/svg'>
-          ${elements.join('\n')}
-    </svg>`
+  // const svg = `
+  //   <svg  height="100%" width="100%" viewbox="${0} ${0} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
+  //         style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
+  //         xmlns='http://www.w3.org/2000/svg'>
+  //         ${elements.join('\n')}
+  //   </svg>`
 
-  console.log('SVG', svg)
+  // console.log('SVG', svg)
 
-  return svg
+  return renderElement(children, `0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}`)
 }

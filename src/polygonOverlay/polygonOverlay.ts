@@ -101,11 +101,13 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
   }
 
   private render() {
-    const bounds = this.getBoundingBox().growOutwards()
-
     if (!this.model) {
       return
     }
+
+    const growFactor = Math.min(5, Math.max(2, (this.map.getZoom() - 12) / 2))
+    console.log('MAP XOOM EEE', this.map.getZoom(), growFactor)
+    const bounds = this.getBoundingBox().growOutwards(growFactor)
 
     const projectedMultiPolygon = this.model
     const newBounds = bounds.modifyIntersect(projectedMultiPolygon.bounds3857)
