@@ -116,7 +116,9 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     const projectedMultiPolygon = this.model
 
     const now = new Date().getTime()
-    const result = svg.render(bounds, projectedMultiPolygon)
+    const zoomFactor = Math.pow(2, this.map.getZoom()) * 256
+    console.log('ZOOM FACTOR', zoomFactor)
+    const result = svg.render(bounds, zoomFactor, projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result

@@ -2,7 +2,7 @@ import * as geometry from './projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from './projectedPolygon';
 import * as simplify from './clip'
 
-const FACTOR = 10000000
+// const FACTOR = 10000000
 
 const COLORS: {[index: number]: string} = { // test
 }
@@ -35,21 +35,38 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiPolygon): string {
+export function render(viewport: ProjectedBounds, zoomFactor: number, multipolygons: ProjectedMultiPolygon): string {
+  // let xMin = multipolygons.bounds3857.southWest.x
+  // let yMin = multipolygons.bounds3857.southWest.y
+  // let xMax = multipolygons.bounds3857.northEast.x
+  // let yMax = multipolygons.bounds3857.northEast.y
+
+  const pairMin = geometry.webMercatorToLeaflet(multipolygons.bounds3857.southWest.x, multipolygons.bounds3857.southWest.y, zoomFactor)
+  const pairMax = geometry.webMercatorToLeaflet(multipolygons.bounds3857.northEast.x, multipolygons.bounds3857.northEast.y, zoomFactor)
+
+  if (pairMax.y < pairMin.y) {
+    [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
+  }
+
+  const xMinLeaflet = Math.floor(pairMin.x)
+  const yMinLeaflet = Math.floor(pairMin.y)
+  const xMaxLeaflet = Math.ceil(pairMax.x)
+  const yMaxLeaflet = Math.ceil(pairMax.y)
+
   const elements: any[] = []
 
+  zoomFactor = Math.min(10000000, zoomFactor)
+
+
   let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet).toLineString()
-  projectedViewport = projectedViewport.map((point, i) => new ProjectedPoint(Math.round(point.x * FACTOR), Math.round(point.y * FACTOR)))
   console.log('CLIP BY', projectedViewport)
 
   function buildSVGPolygonInner(pathData: any[], points: ProjectedPoint[]) {
-    points = points.map((point, i) => new ProjectedPoint(Math.round(point.x * FACTOR), Math.round(point.y * FACTOR)))
     points = simplify.clip(points, projectedViewport)
 
     points.forEach((point, i) => {
       let suffix = i > 0 ? 'L' : 'M'
-      // const generatedPoint = `${suffix} ${point.x * FACTOR} ${point.y * FACTOR}`
-      const generatedPoint = `${suffix} ${point.x} ${point.y}`
+      const generatedPoint = `${suffix} ${Math.round(point.x * zoomFactor) - xMinLeaflet} ${Math.round(point.y * zoomFactor) - yMinLeaflet}`
       pathData.push(generatedPoint)
     })
 
@@ -86,25 +103,9 @@ export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiP
     }
   })
 
-  let xMin = multipolygons.bounds3857.southWest.x
-  let yMin = multipolygons.bounds3857.southWest.y
-  let xMax = multipolygons.bounds3857.northEast.x
-  let yMax = multipolygons.bounds3857.northEast.y
-
-  const pairMin = geometry.webMercatorToLeaflet(xMin, yMin, FACTOR)
-  const pairMax = geometry.webMercatorToLeaflet(xMax, yMax, FACTOR)
-
-  if (pairMax.y < pairMin.y) {
-    [pairMax.y, pairMin.y] = [pairMin.y, pairMax.y]
-  }
-
-  const xMinLeaflet = Math.round(pairMin.x)
-  const yMinLeaflet = Math.round(pairMin.y)
-  const xMaxLeaflet = Math.round(pairMax.x)
-  const yMaxLeaflet = Math.round(pairMax.y)
-
+  // <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
   const svg = `
-    <svg  height="100%" width="100%" viewbox="${xMinLeaflet} ${yMinLeaflet} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
+    <svg  height="100%" width="100%" viewbox="${0} ${0} ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}"
           style='fill:white; opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
           xmlns='http://www.w3.org/2000/svg'>
           ${elements.join('\n')}
