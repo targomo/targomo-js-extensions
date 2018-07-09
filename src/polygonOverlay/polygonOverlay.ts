@@ -119,10 +119,10 @@ export class TgmPolygonOverlay extends google.maps.OverlayView {
     const result = svg.render(bounds, projectedMultiPolygon)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
-    this.divElement.innerHTML = result.svg
+    this.divElement.innerHTML = result
 
-    const southWest = geometry.webMercatorToLatLng({x: result.bounds3857.southWest.x, y: result.bounds3857.southWest.y}, undefined)
-    const northEast = geometry.webMercatorToLatLng({x: result.bounds3857.northEast.x, y: result.bounds3857.northEast.y}, undefined)
+    const southWest = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.southWest, undefined)
+    const northEast = geometry.webMercatorToLatLng(projectedMultiPolygon.bounds3857.northEast, undefined)
 
     this.dataBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(southWest.lat, southWest.lng),

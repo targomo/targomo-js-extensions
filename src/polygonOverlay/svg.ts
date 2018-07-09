@@ -35,7 +35,7 @@ function createGElement(svgData: string, elementOptions: {opacity: number, color
   `
 }
 
-export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiPolygon): {svg: string, bounds3857: ProjectedBounds} {
+export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiPolygon): string {
   const elements: any[] = []
 
   let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet).toLineString()
@@ -112,11 +112,5 @@ export function render(viewport: ProjectedBounds, multipolygons: ProjectedMultiP
 
   console.log('SVG', svg)
 
-  return {
-    svg,
-    bounds3857: multipolygons.bounds3857
-    // bounds: {
-    //   xMin, xMax, yMin, yMax,
-    // }
-  }
+  return svg
 }
