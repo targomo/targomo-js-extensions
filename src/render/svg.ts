@@ -98,7 +98,8 @@ export function render(viewport: ProjectedBounds,
   let projectedViewportLineString = projectedViewport.toLineString()
 
   function renderLineString(pathData: any[], points: ProjectedPoint[]) {
-    // points = collinear.filterCollinear(points, 0.000000000001)
+    console.log('inverse zoom', 1 / zoomFactor)
+    // points = collinear.filterCollinear(points, 1 / (zoomFactor * 100000))
     points = simplify.clip(points, projectedViewportLineString)
 
     points.forEach((point, i) => {

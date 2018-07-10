@@ -1,1 +1,1 @@
-export * from './googleMapsPolygonOverlay/polygonOverlay'
+export * from './google/polygonOverlay'
