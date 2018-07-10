@@ -39,60 +39,66 @@ const defaultPlugins = [
 ]
 
 
-// --- BROWSER ---
+function buildTarget(indexFile, targetFile, targetVariable) {
+  // --- BROWSER ---
 
-// Regular bundle
-rollup.rollup({
-  input: './src/index.browser.ts',
-  external,
-  context: 'window',
-  plugins: defaultPlugins,
-}).then(bundle => {
-  bundle.write({
-    globals,
-    name: 'tgm.googlemaps',
-    sourcemap: true,
-    format: 'umd',
-    banner: getBanner(),
-    file: './dist/targomo-googlemaps.umd.js'
+  // Regular bundle
+  rollup.rollup({
+    input: indexFile,
+    external,
+    context: 'window',
+    plugins: defaultPlugins,
+  }).then(bundle => {
+    bundle.write({
+      globals,
+      name: targetVariable,
+      sourcemap: true,
+      format: 'umd',
+      banner: getBanner(),
+      file: './dist/' +  targetFile + '.umd.js'
+    })
   })
-})
 
-let bannercomment0 = false;
+  let bannercomment0 = false;
 
-// Minified bundle
-rollup.rollup({
-  input: './src/index.browser.ts',
-  external,
-  context: 'window',
-  plugins: [
-    ...defaultPlugins,
-    uglify({
-      output: {
-        comments: function (node, comment) {
-          var text = comment.value
-          var type = comment.type
-          if (type == "comment2") {
-            // multiline comment
-            const show = !bannercomment0
-            bannercomment0 = true
-            return show
+  // Minified bundle
+  rollup.rollup({
+    input: indexFile,
+    external,
+    context: 'window',
+    plugins: [
+      ...defaultPlugins,
+      uglify({
+        output: {
+          comments: function (node, comment) {
+            var text = comment.value
+            var type = comment.type
+            if (type == "comment2") {
+              // multiline comment
+              const show = !bannercomment0
+              bannercomment0 = true
+              return show
+            }
           }
         }
-      }
-    }),
-    copy({
-      "./package.json": "dist/package.json",
-      verbose: true
+      }),
+      copy({
+        "./package.json": "dist/package.json",
+        verbose: true
+      })
+    ],
+  }).then(bundle => {
+    bundle.write({
+      globals,
+      name: targetVariable,
+      sourcemap: true,
+      format: 'umd',
+      banner: getBanner(),
+      file: './dist/' + targetFile + '.umd.min.js',
     })
-  ],
-}).then(bundle => {
-  bundle.write({
-    globals,
-    name: 'tgm.googlemaps',
-    sourcemap: true,
-    format: 'umd',
-    banner: getBanner(),
-    file: './dist/targomo-googlemaps.umd.min.js',
   })
-})
+}
+
+
+buildTarget('./src/index.google.ts',  'targomo-googlemaps', 'tgm.googlemaps')
+buildTarget('./src/index.leaflet.ts', 'targomo-leaflet', 'tgm.leaflet')
