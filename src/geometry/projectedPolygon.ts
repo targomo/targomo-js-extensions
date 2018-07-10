@@ -38,13 +38,13 @@ export class ProjectedBounds {
     return this
   }
 
-  modifyExpand(bounds: ProjectedBounds) {
-    this.southWest.x = Math.min(this.southWest.x, bounds.southWest.x)
-    this.northEast.x = Math.max(this.northEast.x, bounds.northEast.x)
-    this.southWest.y = Math.min(this.southWest.y, bounds.southWest.y)
-    this.northEast.y = Math.max(this.northEast.y, bounds.northEast.y)
-    return this
-  }
+  // modifyExpand(bounds: ProjectedBounds) {
+  //   this.southWest.x = Math.min(this.southWest.x, bounds.southWest.x)
+  //   this.northEast.x = Math.max(this.northEast.x, bounds.northEast.x)
+  //   this.southWest.y = Math.min(this.southWest.y, bounds.southWest.y)
+  //   this.northEast.y = Math.max(this.northEast.y, bounds.northEast.y)
+  //   return this
+  // }
 
   contains(bounds: ProjectedBounds) {
     return (
@@ -105,38 +105,30 @@ export class ProjectedPoint {
   }
 
   /**
-   * [isCollinear Checks if the given three points are collinear. Also see
-   *     https://en.wikipedia.org/wiki/Collinearity. This method uses a tolerance
-   *     factor defined in r360.config.defaultPolygonLayerOptions.tolerance.]
+   * Checks if the given three points are collinear.
    */
-  isCollinear(point1: ProjectedPoint, point3: ProjectedPoint, tolerance: number) {
-    if (point1.x == point3.x && point1.y == point3.y) {
+  isCollinear(before: ProjectedPoint, after: ProjectedPoint, tolerance: number) {
+    if (before.x == after.x && before.y == after.y) {
       return false
     }
 
-    if (point1.x == this.x && this.x == point3.x) {
+    if (before.x == this.x && this.x == after.x) {
       return true
     }
 
-    if (point1.y == this.y && this.y == point3.y) {
+    if (before.y == this.y && this.y == after.y) {
       return true
     }
 
-    const val = (point1.x * (this.y - point3.y) + this.x * (point3.y - point1.y) + point3.x * (point1.y - this.y))
-    if (val < tolerance  &&
-        val > -tolerance &&
-        point1.x != point3.x && point1.y != point3.y ) {
-      return true
-    }
-
-    return false
+    const val = (before.x * (this.y - after.y) + this.x * (after.y - before.y) + after.x * (before.y - this.y))
+    return (val < tolerance  && val > -tolerance && before.x != after.x && before.y != after.y)
   }
 
   /**
    *
    * @param point
    */
-  distanceTo(point: ProjectedPoint) {
+  euclideanDistance(point: ProjectedPoint) {
     return Math.sqrt(Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2))
   }
 }

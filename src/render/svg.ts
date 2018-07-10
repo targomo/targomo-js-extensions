@@ -1,6 +1,7 @@
 import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
+import * as collinear from '../geometry/collinear'
 
 let idCounter = 0
 
@@ -36,8 +37,7 @@ function renderPath(svgData: string, elementOptions: {opacity: number, color: st
 }
 
 function renderElement(children: any[], width: number, height: number) {
-  // 0 0 ${xMaxLeaflet - xMinLeaflet} ${yMaxLeaflet - yMinLeaflet}
-  return  `
+  return `
     <svg  height="100%" width="100%" viewbox="0 0 ${width} ${height}"
           style='opacity: 1; stroke-linejoin:round; stroke-linecap:round; fill-rule: evenodd'
           xmlns='http://www.w3.org/2000/svg'>
@@ -98,6 +98,7 @@ export function render(viewport: ProjectedBounds,
   let projectedViewportLineString = projectedViewport.toLineString()
 
   function renderLineString(pathData: any[], points: ProjectedPoint[]) {
+    // points = collinear.filterCollinear(points, 0.000000000001)
     points = simplify.clip(points, projectedViewportLineString)
 
     points.forEach((point, i) => {
@@ -136,8 +137,8 @@ export function render(viewport: ProjectedBounds,
     if (svgData.length != 0) {
       children.push(renderPath(svgData, {
         opacity: 1,
-        strokeWidth: 5,
-        color: COLORS[travelTime]
+        strokeWidth: options.strokeWidth,
+        color: options.colors[travelTime]
       }))
     }
   })
