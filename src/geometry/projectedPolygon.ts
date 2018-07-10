@@ -103,6 +103,42 @@ export class ProjectedBounds {
 export class ProjectedPoint {
   constructor(public x: number, public y: number) {
   }
+
+  /**
+   * [isCollinear Checks if the given three points are collinear. Also see
+   *     https://en.wikipedia.org/wiki/Collinearity. This method uses a tolerance
+   *     factor defined in r360.config.defaultPolygonLayerOptions.tolerance.]
+   */
+  isCollinear(point1: ProjectedPoint, point3: ProjectedPoint, tolerance: number) {
+    if (point1.x == point3.x && point1.y == point3.y) {
+      return false
+    }
+
+    if (point1.x == this.x && this.x == point3.x) {
+      return true
+    }
+
+    if (point1.y == this.y && this.y == point3.y) {
+      return true
+    }
+
+    const val = (point1.x * (this.y - point3.y) + this.x * (point3.y - point1.y) + point3.x * (point1.y - this.y))
+    if (val < tolerance  &&
+        val > -tolerance &&
+        point1.x != point3.x && point1.y != point3.y ) {
+      return true
+    }
+
+    return false
+  }
+
+  /**
+   *
+   * @param point
+   */
+  distanceTo(point: ProjectedPoint) {
+    return Math.sqrt(Math.pow(this.x - point.x, 2) + Math.pow(this.y - point.y, 2))
+  }
 }
 
 /**

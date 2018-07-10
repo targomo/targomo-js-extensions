@@ -2,11 +2,12 @@
 
 import * as svg from '../render/svg'
 import {geometry} from '@targomo/core'
-import { MultipolygonData } from '../geometry/types';
-import { ProjectedMultiPolygon, ProjectedBounds } from '../geometry/projectedPolygon';
-import { MinMaxSchedule } from '../util/minMaxSchedule';
+import { MultipolygonData } from '../geometry/types'
+import { ProjectedMultiPolygon, ProjectedBounds } from '../geometry/projectedPolygon'
+import { MinMaxSchedule } from '../util/minMaxSchedule'
 
-
+export class GoogleMapsPolygonOverlayOptions extends svg.PolygonRenderOptions {
+}
 
 /**
  *
@@ -24,9 +25,10 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    *
    * @param map
    */
-  constructor(private map: google.maps.Map) {
+  constructor(private map: google.maps.Map, private options?: Partial<GoogleMapsPolygonOverlayOptions>) {
     super()
 
+    this.options = Object.assign(new GoogleMapsPolygonOverlayOptions(), options || {})
     this.setMap(map)
   }
 
@@ -62,7 +64,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     div.style.borderStyle = 'none'
     div.style.borderWidth = '0px'
     div.style.position = 'absolute'
-    div.style.opacity = '0.7'
+    div.style.opacity = ('' + this.options.opacity) || '0.5'
 
     this.divElement = div
 
@@ -91,6 +93,30 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     })
   }
 
+  setInverse(inverse: boolean) {
+    this.options.inverse = inverse
+    this.render()
+  }
+
+  setColors(colors: {[edgeWeight: number]: string}) {
+    this.options.colors = colors
+    this.render()
+  }
+
+  setOpacity(opacity: number) {
+    this.options.opacity = opacity
+    // this.render()
+
+    if (this.divElement) {
+      this.divElement.style.opacity = '' + this.options.opacity || '0.5'
+    }
+  }
+
+  setStrokeWidth(strokeWidth: number) {
+    this.options.strokeWidth = strokeWidth
+    this.render()
+  }
+
   private getBoundingBox() {
     const bounds = this.map.getBounds()
 
@@ -107,7 +133,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   }
 
   private render() {
-    const inverse = true
+    const inverse = this.options.inverse
 
     if (!this.model || !this.divElement) {
       return
@@ -130,9 +156,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
 
     const now = new Date().getTime()
     const zoomFactor = Math.pow(2, this.map.getZoom()) * 256
-    const result = svg.render(bounds, newBounds, zoomFactor, projectedMultiPolygon, {
-      inverse
-    })
+    const result = svg.render(bounds, newBounds, zoomFactor, projectedMultiPolygon, this.options)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result

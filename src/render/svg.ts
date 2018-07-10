@@ -4,13 +4,6 @@ import * as simplify from '../geometry/clip'
 
 let idCounter = 0
 
-export interface RenderOptions {
-  inverse?: boolean
-  colors?: {[edgeWeight: number]: string}
-  opacity?: number
-  strokeWidth?: number
-}
-
 const COLORS: {[index: number]: string} = { // test
 }
 
@@ -18,6 +11,13 @@ const COLORS: {[index: number]: string} = { // test
 ; ['#006837', '#39B54A', '#8CC63F', '#F7931E', '#F15A24', '#C1272D'].forEach((color, i) => {
   COLORS[(i + 1) * 300] = color
 })
+
+export class PolygonRenderOptions {
+  inverse: boolean = false
+  colors: {[edgeWeight: number]: string} = COLORS
+  opacity: number = 0.5
+  strokeWidth: number = 5
+}
 
 function renderPath(svgData: string, elementOptions: {opacity: number, color: string, strokeWidth: number}) {
   let initialOpacity = elementOptions.opacity
