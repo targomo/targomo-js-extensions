@@ -3,14 +3,21 @@ import { ProjectedPoint, ProjectedBounds, ProjectedBoundsData } from '../geometr
 import {PolygonOverlayElement, PolygonOverlayElementPlugin} from '../overlay/polygonOverlayElement'
 import { BoundingBox, geometry } from '@targomo/core';
 import { MultipolygonData } from '../geometry/types';
+import * as svg from '../render/svg'
+
+export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptions {
+}
+
 
 export class TgmLeafletPolygonOverlay extends L.Layer {
   private element: PolygonOverlayElement
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
 
-  constructor() {
+  constructor(private options?: Partial<LeafletPolygonOverlayOptions>) {
     super()
+
+    this.options = Object.assign(new LeafletPolygonOverlayOptions(), options || {})
   }
 
   setData(multipolygon: MultipolygonData[]) {
@@ -51,7 +58,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
 
         return {northEast, southWest}
       }
-    })
+    }, this.options)
 
     map.getPanes().overlayPane.appendChild(this.element.initElement())
 
@@ -76,6 +83,30 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     this.draw()
 
     return this
+  }
+
+  setInverse(inverse: boolean) {
+    this.options.inverse = inverse
+    this.draw()
+  }
+
+  setColors(colors: {[edgeWeight: number]: string}) {
+    this.options.colors = colors
+    this.draw()
+  }
+
+  setOpacity(opacity: number) {
+    this.options.opacity = opacity
+
+    if (this.element) {
+      const div = this.element.getElement()
+      div.style.opacity = '' + this.options.opacity || '0.5'
+    }
+  }
+
+  setStrokeWidth(strokeWidth: number) {
+    this.options.strokeWidth = strokeWidth
+    this.draw()
   }
 }
 
