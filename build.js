@@ -16,7 +16,8 @@ const deps = Object.keys(require("./package.json").dependencies).concat(Object.k
 const builtinImports = []
 const external = [...deps, ...builtinImports]
 const globals = {
-  '@targomo/core': 'tgm'
+  '@targomo/core': 'tgm',
+  'leaflet': 'L'
 }
 
 const production = !process.env.ROLLUP_WATCH;

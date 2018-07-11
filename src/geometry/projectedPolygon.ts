@@ -1,10 +1,15 @@
 import { MultipolygonData, PolygonData } from './types'
 import * as geometry from './projection'
 
+export interface ProjectedBoundsData {
+  southWest: ProjectedPointData
+  northEast: ProjectedPointData
+}
+
 /**
  *
  */
-export class ProjectedBounds {
+export class ProjectedBounds implements ProjectedBoundsData {
   southWest: ProjectedPoint = new ProjectedPoint(Infinity, Infinity)
   northEast: ProjectedPoint = new ProjectedPoint(-Infinity, -Infinity)
 
@@ -25,12 +30,12 @@ export class ProjectedBounds {
     this.northEast.y = Math.max(this.northEast.y, y)
   }
 
-  expand(bounds: ProjectedBounds) {
+  expand(bounds: ProjectedBoundsData) {
     this.expandPoint(bounds.northEast.x, bounds.northEast.y)
     this.expandPoint(bounds.southWest.x, bounds.southWest.y)
   }
 
-  modifyIntersect(bounds: ProjectedBounds) {
+  modifyIntersect(bounds: ProjectedBoundsData) {
     this.southWest.x = Math.max(this.southWest.x, bounds.southWest.x)
     this.northEast.x = Math.min(this.northEast.x, bounds.northEast.x)
     this.southWest.y = Math.max(this.southWest.y, bounds.southWest.y)
@@ -46,7 +51,7 @@ export class ProjectedBounds {
   //   return this
   // }
 
-  contains(bounds: ProjectedBounds) {
+  contains(bounds: ProjectedBoundsData) {
     return (
       this.northEast.x >= bounds.northEast.x &&
       this.northEast.y >= bounds.northEast.y &&
@@ -55,7 +60,7 @@ export class ProjectedBounds {
     )
   }
 
-  intersects(bounds: ProjectedBounds) {
+  intersects(bounds: ProjectedBoundsData) {
     return !(
       this.northEast.x < bounds.southWest.x ||
       this.northEast.y < bounds.southWest.y ||
@@ -97,10 +102,15 @@ export class ProjectedBounds {
   }
 }
 
+export interface ProjectedPointData {
+  x: number
+  y: number
+}
+
 /**
  *
  */
-export class ProjectedPoint {
+export class ProjectedPoint implements ProjectedPointData {
   constructor(public x: number, public y: number) {
   }
 
