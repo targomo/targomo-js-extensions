@@ -19,13 +19,14 @@ export class PolygonOverlayElement {
   private bounds: BoundingBox
   private model: ProjectedMultiPolygon
   private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
+  private options: svg.PolygonRenderOptions
 
   /**
    *
    * @param map
    */
   constructor(private plugin: PolygonOverlayElementPlugin,
-              private options?: Partial<svg.PolygonRenderOptions>) {
+              options?: Partial<svg.PolygonRenderOptions>) {
     this.options = Object.assign(new svg.PolygonRenderOptions(), options || {})
   }
 
@@ -47,7 +48,6 @@ export class PolygonOverlayElement {
     }
 
     const bounds = this.plugin.getElementPixels(this.bounds)
-
     const sw = bounds.southWest
     const ne = bounds.northEast
 
@@ -112,6 +112,24 @@ export class PolygonOverlayElement {
     this.render()
   }
 
+  private boundsCalculation(growFactor: number) {
+    const projectedMultiPolygon = this.model
+    const inverse = this.options.inverse
+
+    const viewPort = new ProjectedBounds(this.plugin.getViewPort()) // .growOutwardsAmount(this.options && this.options.strokeWidth || 0)
+    const bounds = new ProjectedBounds(viewPort)
+    console.log('VIEW', viewPort)
+    let newBounds = new ProjectedBounds(bounds).growOutwardsFactor(growFactor).modifyIntersect(projectedMultiPolygon.bounds3857)
+
+    if (inverse) {
+      newBounds.expand(viewPort)
+      newBounds.growOutwardsFactor(growFactor)
+    }
+
+    bounds.growOutwardsFactor(growFactor)
+
+    return {bounds, newBounds}
+  }
 
   private render() {
     const inverse = this.options.inverse
@@ -121,25 +139,17 @@ export class PolygonOverlayElement {
     }
 
     const zoom = this.plugin.getZoom()
+    let zoomFactor = Math.pow(2, zoom) * 256
+    zoomFactor = Math.min(10000000, zoomFactor)
+
     const growFactor = Math.min(5, Math.max(2, (zoom - 12) / 2))
-
-    const viewPort = this.plugin.getViewPort()
-    const bounds = new ProjectedBounds(viewPort)
-
-    const projectedMultiPolygon = this.model
-    let newBounds = new ProjectedBounds(bounds).growOutwards(growFactor).modifyIntersect(projectedMultiPolygon.bounds3857)
-
-    if (inverse) {
-      newBounds.expand(viewPort)
-      newBounds.growOutwards(growFactor)
-    }
-
-    bounds.growOutwards(growFactor)
+    const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
     const now = new Date().getTime()
-    const zoomFactor = Math.pow(2, zoom) * 256
-    const result = svg.render(bounds, newBounds, zoomFactor, projectedMultiPolygon, this.options)
+    const result = svg.render(bounds, newBounds, zoomFactor, this.model, this.options)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
+
+    console.log('NEW BOUNDS', newBounds)
 
     this.divElement.innerHTML = result
 

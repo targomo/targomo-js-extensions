@@ -17,12 +17,13 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   private element: PolygonOverlayElement
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
+  private options: GoogleMapsPolygonOverlayOptions
 
   /**
    *
    * @param map
    */
-  constructor(private map: google.maps.Map, private options?: Partial<GoogleMapsPolygonOverlayOptions>) {
+  constructor(private map: google.maps.Map, options?: Partial<GoogleMapsPolygonOverlayOptions>) {
     super()
 
     this.options = Object.assign(new GoogleMapsPolygonOverlayOptions(), options || {})

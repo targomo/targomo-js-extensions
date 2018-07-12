@@ -69,7 +69,7 @@ export class ProjectedBounds implements ProjectedBoundsData {
     )
   }
 
-  growOutwards(factor: number = 1) {
+  growOutwardsFactor(factor: number = 1) {
     let diffX = (this.northEast.x - this.southWest.x) * factor
     let diffY = (this.northEast.y - this.southWest.y) * factor
 
@@ -77,6 +77,16 @@ export class ProjectedBounds implements ProjectedBoundsData {
     this.northEast.y += diffY
     this.southWest.x -= diffX
     this.southWest.y -= diffY
+
+    return this
+  }
+
+  growOutwardsAmount(amount: number) {
+    console.log('GROW AMONT', this, amount, this.northEast, this.southWest)
+    this.northEast.x += amount
+    this.northEast.y += amount
+    this.southWest.x -= amount
+    this.southWest.y -= amount
 
     return this
   }

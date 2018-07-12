@@ -17,7 +17,7 @@ export class PolygonRenderOptions {
   inverse: boolean = false
   colors: {[edgeWeight: number]: string} = COLORS
   opacity: number = 0.5
-  strokeWidth: number = 5
+  strokeWidth: number = 50
 }
 
 function renderPath(svgData: string, elementOptions: {opacity: number, color: string, strokeWidth: number}) {
@@ -78,9 +78,8 @@ export function render(viewport: ProjectedBounds,
                        bounds3857: ProjectedBounds,
                        zoomFactor: number,
                        multipolygons: ProjectedMultiPolygon,
-                       options: any
+                       options: PolygonRenderOptions
                       ): string {
-  zoomFactor = Math.min(10000000, zoomFactor)
   const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
 
@@ -94,11 +93,14 @@ export function render(viewport: ProjectedBounds,
   const yMaxLeaflet = Math.ceil(pairMax.y)
 
 
-  let projectedViewport = viewport.reproject(geometry.webMercatorToLeaflet)
+  let projectedViewport = new ProjectedBounds(viewport)
+                            .reproject(geometry.webMercatorToLeaflet)
+
   let projectedViewportLineString = projectedViewport.toLineString()
 
   function renderLineString(pathData: any[], points: ProjectedPoint[]) {
     console.log('inverse zoom', 1 / zoomFactor)
+    console.log('INVERSE ZOOM', )
     // points = collinear.filterCollinear(points, 1 / (zoomFactor * 100000))
     points = simplify.clip(points, projectedViewportLineString)
 

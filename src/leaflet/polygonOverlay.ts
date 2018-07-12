@@ -13,8 +13,9 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
   private element: PolygonOverlayElement
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
+  private options: LeafletPolygonOverlayOptions
 
-  constructor(private options?: Partial<LeafletPolygonOverlayOptions>) {
+  constructor(options?: Partial<LeafletPolygonOverlayOptions>) {
     super()
 
     this.options = Object.assign(new LeafletPolygonOverlayOptions(), options || {})
