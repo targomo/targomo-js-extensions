@@ -61,19 +61,32 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
       }
     }, this.options)
 
-    map.getPanes().overlayPane.appendChild(this.element.initElement())
+    const div = this.element.initElement()
+    L.DomUtil.addClass(div, 'leaflet-zoom-' + (true ? 'animated' : 'hide'))
+
+    map.getPanes().overlayPane.appendChild(div)
 
     map.on('moveend', this.draw, this)
     map.on('resize',  this.draw, this)
     map.on('zoom',  this.draw, this)
 
-    map.on('zoom',  () => {
-      console.log('event xoom')
-    })
+/*
+    map.on('zoomanim', (e: L.ZoomAnimEvent) => {
+      console.log('E', e)
+      console.log('CURRENT ZOOM', map.getZoom())
+      const scale = map.getZoomScale(map.getZoom(), e.zoom)
 
-    map.on('zoomanim',  () => {
-      console.log('event xoom anim')
+      console.log('SCALE', scale)
+      const offset = (map as any)._getCenterOffset(e.center)._multiplyBy(-scale).subtract((map as any)._getMapPanePos())
+
+      // const div = this.element.getElement()
+      L.DomUtil.setTransform(div, offset, scale)
+
+      console.log('AN*****************', div.style.transform)
+      // div.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')'
+      // console.log('event xoom anim', offset)
     })
+    /* */
 
     this.readyResolve()
     this.draw()

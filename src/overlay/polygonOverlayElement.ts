@@ -128,6 +128,14 @@ export class PolygonOverlayElement {
 
     bounds.growOutwardsFactor(growFactor)
 
+    // pixel to
+    const southWest = geometry.webMercatorToLatLng(viewPort.southWest, undefined)
+    const northEast = geometry.webMercatorToLatLng(viewPort.northEast, undefined)
+    const newPixelBounds = this.plugin.getElementPixels({southWest, northEast})
+    const ratio = Math.abs((viewPort.northEast.x - viewPort.southWest.x) / newPixelBounds.northEast.x - newPixelBounds.southWest.x)
+    newBounds.growOutwardsAmount(this.options && (ratio * this.options.strokeWidth) || 0)
+    //
+
     return {bounds, newBounds}
   }
 
@@ -148,8 +156,6 @@ export class PolygonOverlayElement {
     const now = new Date().getTime()
     const result = svg.render(bounds, newBounds, zoomFactor, this.model, this.options)
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
-
-    console.log('NEW BOUNDS', newBounds)
 
     this.divElement.innerHTML = result
 
