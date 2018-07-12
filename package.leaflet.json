@@ -1,0 +1,13 @@
+{
+  "name": "@targomo/leaflet",
+  "description": "The JavaScript (& TypeScript) API for Targomo's time-based access mapping services.",
+  "main": "targomo-leaflet.js",
+  "module": "targomo-leaflet.js",
+  "browser": "targomo-leaflet.umd.min.js",
+  "typings": "./typings/index.d.ts",
+  "dependencies": {
+    "@targomo/core": "^0.1.5",
+    "@types/leaflet": "^1.2.8",
+    "leaflet": "^1.3.1"
+  }
+}

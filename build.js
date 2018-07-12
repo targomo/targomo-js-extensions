@@ -4,6 +4,8 @@ const typescript = require('rollup-plugin-typescript2')
 const copy = require('rollup-plugin-copy')
 const resolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
+const fs = require('fs')
+const paths = require('path')
 
 const curVersion = JSON.stringify(require("./package.json").version)
 const curYear = new Date().getFullYear()
@@ -30,6 +32,29 @@ function getBanner() {
 */`
 }
 
+function mergePackage(which, destination) {
+  const mainPackage = require('./package.json')
+  const specificPackage = require(`./package.${which}.json`)
+
+  const merged = {
+    ...mainPackage,
+    ...specificPackage
+  }
+
+  // for (let key in merged) {
+  //   let mainValue = mainPackage[key]
+  //   let specificValue = specificPackage[key]
+
+  //   let anyValue = mainValue || specificValue
+  //   if (anyValue instanceof Array) {
+  //     merged[key] = (mainValue || []).concat(specificValue || [])
+  //   } else if (anyValue === Object(anyValue)) {
+  //     merged[key] = {...(mainValue || {}), ...(specificValue || {})}
+  //   }
+  // }
+
+  fs.writeFileSync(paths.join(__dirname, destination), JSON.stringify(merged))
+}
 
 function buildTarget(which) {
   const indexFile = `./src/index.${which}.ts`
@@ -60,7 +85,7 @@ function buildTarget(which) {
     context: 'window',
     plugins: defaultPlugins,
   }).then(bundle => {
-    bundle.write({
+    return bundle.write({
       globals,
       name: targetVariable,
       sourcemap: true,
@@ -68,39 +93,39 @@ function buildTarget(which) {
       banner: getBanner(),
       file: distFolder +  targetFile + '.umd.js'
     })
-  })
+  }).then(() => {
+    let bannercomment0 = false;
 
-  let bannercomment0 = false;
-
-  // Minified bundle
-  rollup.rollup({
-    input: indexFile,
-    external,
-    context: 'window',
-    plugins: [
-      ...defaultPlugins,
-      uglify({
-        output: {
-          comments: function (node, comment) {
-            var text = comment.value
-            var type = comment.type
-            if (type == "comment2") {
-              // multiline comment
-              const show = !bannercomment0
-              bannercomment0 = true
-              return show
+    // Minified bundle
+    return rollup.rollup({
+      input: indexFile,
+      external,
+      context: 'window',
+      plugins: [
+        ...defaultPlugins,
+        uglify({
+          output: {
+            comments: function (node, comment) {
+              var text = comment.value
+              var type = comment.type
+              if (type == "comment2") {
+                // multiline comment
+                const show = !bannercomment0
+                bannercomment0 = true
+                return show
+              }
             }
           }
-        }
-      }),
-      copy({
-        "./package.json" : distFolder + `package.json`,
-        // './dist/typings' : distFolder,
-        verbose: true
-      })
-    ],
+        }),
+        // copy({
+        //   "./package.json" : distFolder + `package.json`,
+        //   // './dist/typings' : distFolder,
+        //   verbose: true
+        // })
+      ],
+    })
   }).then(bundle => {
-    bundle.write({
+    return bundle.write({
       globals,
       name: targetVariable,
       sourcemap: true,
@@ -108,6 +133,8 @@ function buildTarget(which) {
       banner: getBanner(),
       file: distFolder + targetFile + '.umd.min.js',
     })
+  }).then(() => {
+    mergePackage(which, distFolder + `package.json`)
   })
 }
 
