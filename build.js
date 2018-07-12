@@ -30,17 +30,27 @@ function getBanner() {
 */`
 }
 
-const defaultPlugins = [
-  typescript({
-    tsconfig: './tsconfig.json',
-    useTsconfigDeclarationDir: true
-  }),
-  resolve(),
-  commonjs()
-]
 
+function buildTarget(which) {
+  const indexFile = `./src/index.${which}.ts`
+  const targetFile = `targomo-${which}`
+  const targetVariable = `tgm.${which}`
+  const distFolder = `./dist/${which}/`
 
-function buildTarget(indexFile, targetFile, targetVariable) {
+  const defaultPlugins = [
+    typescript({
+      tsconfig: './tsconfig.json',
+      useTsconfigDeclarationDir: true,
+      tsconfigOverride: {
+        compilerOptions: {
+          declarationDir: `${distFolder}typings`
+        }
+      }
+    }),
+    resolve(),
+    commonjs()
+  ]
+  
   // --- BROWSER ---
 
   // Regular bundle
@@ -56,7 +66,7 @@ function buildTarget(indexFile, targetFile, targetVariable) {
       sourcemap: true,
       format: 'umd',
       banner: getBanner(),
-      file: './dist/' +  targetFile + '.umd.js'
+      file: distFolder +  targetFile + '.umd.js'
     })
   })
 
@@ -84,7 +94,8 @@ function buildTarget(indexFile, targetFile, targetVariable) {
         }
       }),
       copy({
-        "./package.json": "dist/package.json",
+        "./package.json" : distFolder + `package.json`,
+        // './dist/typings' : distFolder,
         verbose: true
       })
     ],
@@ -95,11 +106,11 @@ function buildTarget(indexFile, targetFile, targetVariable) {
       sourcemap: true,
       format: 'umd',
       banner: getBanner(),
-      file: './dist/' + targetFile + '.umd.min.js',
+      file: distFolder + targetFile + '.umd.min.js',
     })
   })
 }
 
 
-buildTarget('./src/index.google.ts',  'targomo-googlemaps', 'tgm.googlemaps')
-buildTarget('./src/index.leaflet.ts', 'targomo-leaflet', 'tgm.leaflet')
+buildTarget('googlemaps')
+buildTarget('leaflet')
