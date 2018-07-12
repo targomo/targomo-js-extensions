@@ -2,23 +2,10 @@ import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
 import * as collinear from '../geometry/collinear'
+import { PolygonRenderOptions } from './options'
+export { PolygonRenderOptions } from './options'
 
 let idCounter = 0
-
-const COLORS: {[index: number]: string} = { // test
-}
-
-// test
-; ['#006837', '#39B54A', '#8CC63F', '#F7931E', '#F15A24', '#C1272D'].forEach((color, i) => {
-  COLORS[(i + 1) * 300] = color
-})
-
-export class PolygonRenderOptions {
-  inverse: boolean = false
-  colors: {[edgeWeight: number]: string} = COLORS
-  opacity: number = 0.5
-  strokeWidth: number = 50
-}
 
 function renderPath(svgData: string, elementOptions: {opacity: number, color: string, strokeWidth: number}) {
   let initialOpacity = elementOptions.opacity
@@ -99,8 +86,6 @@ export function render(viewport: ProjectedBounds,
   let projectedViewportLineString = projectedViewport.toLineString()
 
   function renderLineString(pathData: any[], points: ProjectedPoint[]) {
-    console.log('inverse zoom', 1 / zoomFactor)
-    console.log('INVERSE ZOOM', )
     // points = collinear.filterCollinear(points, 1 / (zoomFactor * 100000))
     points = simplify.clip(points, projectedViewportLineString)
 

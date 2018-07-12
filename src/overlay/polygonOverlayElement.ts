@@ -1,4 +1,4 @@
-import * as svg from '../render/svg'
+import * as svg from '../svg/render'
 import {geometry, BoundingBox} from '@targomo/core'
 import { MultipolygonData } from '../geometry/types'
 import { ProjectedMultiPolygon, ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
@@ -118,7 +118,6 @@ export class PolygonOverlayElement {
 
     const viewPort = new ProjectedBounds(this.plugin.getViewPort()) // .growOutwardsAmount(this.options && this.options.strokeWidth || 0)
     const bounds = new ProjectedBounds(viewPort)
-    console.log('VIEW', viewPort)
     let newBounds = new ProjectedBounds(bounds).growOutwardsFactor(growFactor).modifyIntersect(projectedMultiPolygon.bounds3857)
 
     if (inverse) {

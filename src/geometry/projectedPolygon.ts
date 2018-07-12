@@ -82,7 +82,6 @@ export class ProjectedBounds implements ProjectedBoundsData {
   }
 
   growOutwardsAmount(amount: number) {
-    console.log('GROW AMONT', this, amount, this.northEast, this.southWest)
     this.northEast.x += amount
     this.northEast.y += amount
     this.southWest.x -= amount

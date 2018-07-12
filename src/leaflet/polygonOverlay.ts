@@ -3,7 +3,7 @@ import { ProjectedPoint, ProjectedBounds, ProjectedBoundsData } from '../geometr
 import {PolygonOverlayElement, PolygonOverlayElementPlugin} from '../overlay/polygonOverlayElement'
 import { BoundingBox, geometry } from '@targomo/core';
 import { MultipolygonData } from '../geometry/types';
-import * as svg from '../render/svg'
+import * as svg from '../svg/render'
 
 export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptions {
 }

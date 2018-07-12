@@ -1,6 +1,6 @@
 /// <reference path='../../node_modules/@types/googlemaps/index.d.ts' />
 
-import * as svg from '../render/svg'
+import * as svg from '../svg/render'
 import {geometry, BoundingBox} from '@targomo/core'
 import { MultipolygonData } from '../geometry/types'
 import { ProjectedMultiPolygon, ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
