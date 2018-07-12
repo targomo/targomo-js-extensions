@@ -7,7 +7,7 @@ import { ProjectedMultiPolygon, ProjectedBounds, ProjectedBoundsData } from '../
 import { MinMaxSchedule } from '../util/minMaxSchedule'
 import { PolygonOverlayElement } from '../overlay/polygonOverlayElement';
 
-export class GoogleMapsPolygonOverlayOptions extends svg.PolygonRenderOptions {
+export class GoogleMapsPolygonOverlayOptions extends svg.PolygonRenderOptionsData {
 }
 
 /**

@@ -2,8 +2,8 @@ import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
 import * as collinear from '../geometry/collinear'
-import { PolygonRenderOptions } from './options'
-export { PolygonRenderOptions } from './options'
+import { PolygonRenderOptionsData, PolygonRenderOptions } from './options'
+export { PolygonRenderOptionsData } from './options'
 
 let idCounter = 0
 
@@ -14,9 +14,9 @@ function renderPath(svgData: string, elementOptions: {opacity: number, color: st
     <g style='opacity: ${initialOpacity}'>
       <path style='stroke: ${elementOptions.color};
             fill: ${elementOptions.color};
-            stroke-opacity: 1;
+            stroke-opacity: ${elementOptions.opacity};
             stroke-width: ${elementOptions.strokeWidth};
-            fill-opacity:1'
+            fill-opacity: ${elementOptions.opacity}'
 
             d='${svgData}'/>
     </g>
@@ -120,13 +120,13 @@ export function render(viewport: ProjectedBounds,
   }
 
   const children: any[] = []
-  multipolygons.forEach((travelTime, polygons) => {
+  multipolygons.forEach((travelTime, polygons, i) => {
     const svgData = polygons.map(item => renderPolygon(item).join(' ')).join(' ')
     if (svgData.length != 0) {
+      const polygonOption = options.getColorOpacity(travelTime, i)
       children.push(renderPath(svgData, {
-        opacity: 1,
+        ...polygonOption,
         strokeWidth: options.strokeWidth,
-        color: options.colors[travelTime]
       }))
     }
   })

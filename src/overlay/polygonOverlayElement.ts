@@ -3,6 +3,7 @@ import {geometry, BoundingBox} from '@targomo/core'
 import { MultipolygonData } from '../geometry/types'
 import { ProjectedMultiPolygon, ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
 import { MinMaxSchedule } from '../util/minMaxSchedule'
+import { PolygonRenderOptions } from '../svg/options';
 
 
 export interface PolygonOverlayElementPlugin {
@@ -19,15 +20,15 @@ export class PolygonOverlayElement {
   private bounds: BoundingBox
   private model: ProjectedMultiPolygon
   private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
-  private options: svg.PolygonRenderOptions
+  private options: svg.PolygonRenderOptionsData
 
   /**
    *
    * @param map
    */
   constructor(private plugin: PolygonOverlayElementPlugin,
-              options?: Partial<svg.PolygonRenderOptions>) {
-    this.options = Object.assign(new svg.PolygonRenderOptions(), options || {})
+              options?: Partial<svg.PolygonRenderOptionsData>) {
+    this.options = Object.assign(new svg.PolygonRenderOptionsData(), options || {})
   }
 
   getElement() {
@@ -153,7 +154,7 @@ export class PolygonOverlayElement {
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
     const now = new Date().getTime()
-    const result = svg.render(bounds, newBounds, zoomFactor, this.model, this.options)
+    const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
     console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result

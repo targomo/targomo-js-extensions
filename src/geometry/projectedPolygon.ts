@@ -221,8 +221,8 @@ export class ProjectedMultiPolygon {
     })
   }
 
-  forEach(callback: (travelTime: number, polygon: ProjectedPolygon[]) => void) {
+  forEach(callback: (travelTime: number, polygon: ProjectedPolygon[], i?: number) => void) {
     let keys = Object.keys(this.polygons).map(key => +key).sort((a, b) => b - a)
-    keys.forEach(key => callback(+key, this.polygons[<any>key]))
+    keys.forEach((key, i) => callback(+key, this.polygons[<any>key], i))
   }
 }

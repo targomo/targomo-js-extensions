@@ -5,7 +5,7 @@ import { BoundingBox, geometry } from '@targomo/core';
 import { MultipolygonData } from '../geometry/types';
 import * as svg from '../svg/render'
 
-export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptions {
+export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptionsData {
 }
 
 
