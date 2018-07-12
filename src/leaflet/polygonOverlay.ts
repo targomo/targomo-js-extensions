@@ -74,11 +74,6 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
       console.log('event xoom anim')
     })
 
-    map.on('move',  () => {
-      console.log('event move')
-
-    })
-
     this.readyResolve()
     this.draw()
 
