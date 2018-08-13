@@ -17,7 +17,7 @@ export interface PolygonOverlayElementPlugin {
  */
 export class PolygonOverlayElement {
   private divElement: HTMLDivElement
-  private bounds: BoundingBox
+  bounds: BoundingBox
   private model: ProjectedMultiPolygon
   private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
   private options: svg.PolygonRenderOptionsData
