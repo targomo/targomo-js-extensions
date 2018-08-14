@@ -41,10 +41,10 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
   /**
    *
    */
-  draw(immediately: boolean = false) {
+  draw() {
     if (this.element) {
       L.DomUtil.setTransform(this.element.getElement(), new L.Point(0, 0), null)
-      this.element.draw(immediately)
+      this.element.draw(true)
     }
   }
 
@@ -86,11 +86,11 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
 
     map.getPanes().overlayPane.appendChild(div)
 
-    const draw = () => this.draw()
+    // const draw = () => this.draw()
 
-    map.on('moveend', draw, this)
-    map.on('resize',  draw, this)
-    map.on('zoomend',  draw, this)
+    map.on('moveend', this.draw, this)
+    map.on('resize',  this.draw, this)
+    map.on('zoomend',  this.draw, this)
 
     map.on('zoomanim', (e: L.ZoomAnimEvent) => {
       if (this.element.bounds) {
@@ -117,7 +117,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    */
   setInverse(inverse: boolean) {
     this.options.inverse = inverse
-    this.draw(true)
+    this.draw()
   }
 
   /**
@@ -126,7 +126,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    */
   setColors(colors: {[edgeWeight: number]: PolygonRenderColorOption}) {
     this.options.colors = colors
-    this.draw(true)
+    this.draw()
   }
 
   /**
@@ -148,7 +148,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    */
   setStrokeWidth(strokeWidth: number) {
     this.options.strokeWidth = strokeWidth
-    this.draw(true)
+    this.draw()
   }
 }
 
