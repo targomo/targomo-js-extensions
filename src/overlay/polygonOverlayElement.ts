@@ -158,7 +158,7 @@ export class PolygonOverlayElement {
 
     const now = new Date().getTime()
     const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
-    console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
+    // console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result
 
