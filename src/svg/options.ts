@@ -6,7 +6,7 @@ COLORS.forEach((color, i) => {
 })
 
 export interface PolygonRenderColorComplexOption {
-  color: string
+  color?: string
   opacity?: number
 }
 
@@ -41,12 +41,12 @@ export class PolygonRenderOptions extends PolygonRenderOptionsData {
 
     if (isPolygonRenderColorComplexOption(option)) {
       return {
-        color: option.color,
+        color: option.color || '#ccc',
         opacity: option.opacity || 1
       }
     } else {
       return {
-        color: option,
+        color: option || '#ccc',
         opacity: 1
       }
     }

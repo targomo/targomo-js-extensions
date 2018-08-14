@@ -3,9 +3,9 @@
 import * as svg from '../svg/render'
 import {geometry, BoundingBox} from '@targomo/core'
 import { MultipolygonData } from '../geometry/types'
-import { ProjectedMultiPolygon, ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
-import { MinMaxSchedule } from '../util/minMaxSchedule'
+import { ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
 import { PolygonOverlayElement } from '../overlay/polygonOverlayElement';
+import { PolygonRenderColorOption } from '../svg/options';
 
 export class GoogleMapsPolygonOverlayOptions extends svg.PolygonRenderOptionsData {
 }
@@ -105,7 +105,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    *
    * @param colors
    */
-  setColors(colors: {[edgeWeight: number]: string}) {
+  setColors(colors: {[edgeWeight: number]: PolygonRenderColorOption}) {
     this.options.colors = colors
     this.draw(true)
   }

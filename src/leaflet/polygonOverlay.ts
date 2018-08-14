@@ -1,13 +1,13 @@
 import * as L from 'leaflet'
-import { ProjectedPoint, ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon';
-import {PolygonOverlayElement, PolygonOverlayElementPlugin} from '../overlay/polygonOverlayElement'
-import { BoundingBox, geometry } from '@targomo/core';
-import { MultipolygonData } from '../geometry/types';
+import { ProjectedBounds, ProjectedBoundsData } from '../geometry/projectedPolygon'
+import {PolygonOverlayElement} from '../overlay/polygonOverlayElement'
+import { BoundingBox, geometry } from '@targomo/core'
+import { MultipolygonData } from '../geometry/types'
 import * as svg from '../svg/render'
+import { PolygonRenderColorOption } from '../svg/options'
 
 export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptionsData {
 }
-
 
 /**
  *
@@ -124,7 +124,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    *
    * @param colors
    */
-  setColors(colors: {[edgeWeight: number]: string}) {
+  setColors(colors: {[edgeWeight: number]: PolygonRenderColorOption}) {
     this.options.colors = colors
     this.draw(true)
   }
