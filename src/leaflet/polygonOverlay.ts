@@ -90,7 +90,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
 
     map.on('moveend', draw, this)
     map.on('resize',  draw, this)
-    map.on('zoom',  draw, this)
+    map.on('zoomend',  draw, this)
 
     map.on('zoomanim', (e: L.ZoomAnimEvent) => {
       if (this.element.bounds) {
