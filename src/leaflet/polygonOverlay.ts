@@ -9,24 +9,38 @@ export class LeafletPolygonOverlayOptions extends svg.PolygonRenderOptionsData {
 }
 
 
+/**
+ *
+ */
 export class TgmLeafletPolygonOverlay extends L.Layer {
   private element: PolygonOverlayElement
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
   private options: LeafletPolygonOverlayOptions
 
+  /**
+   *
+   * @param options
+   */
   constructor(options?: Partial<LeafletPolygonOverlayOptions>) {
     super()
 
     this.options = Object.assign(new LeafletPolygonOverlayOptions(), options || {})
   }
 
+  /**
+   *
+   * @param multipolygon
+   */
   setData(multipolygon: MultipolygonData[]) {
     this.readyPromise.then(() => {
       this.element.setData(multipolygon)
     })
   }
 
+  /**
+   *
+   */
   draw() {
     if (this.element) {
       L.DomUtil.setTransform(this.element.getElement(), new L.Point(0, 0), null)
@@ -34,6 +48,10 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     }
   }
 
+  /**
+   *
+   * @param map
+   */
   onAdd(map: L.Map) {
     this.element = new PolygonOverlayElement({
       getZoom() {
@@ -63,6 +81,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     }, this.options)
 
     const div = this.element.initElement()
+    div.style.transformOrigin = 'center'
     L.DomUtil.addClass(div, 'leaflet-zoom-' + (true ? 'animated' : 'hide'))
 
     map.getPanes().overlayPane.appendChild(div)
@@ -80,7 +99,6 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
         const pos = (map as any)._latLngToNewLayerPoint(latLng, e.zoom, e.center).round()
         const cur = (map as any)._latLngToNewLayerPoint(latLng, map.getZoom(), map.getCenter()).round()
 
-        div.style.transformOrigin = 'center'
         L.DomUtil.setTransform(div, new L.Point(pos.x - cur.x, pos.y - cur.y), scale)
       }
     })
@@ -91,16 +109,28 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     return this
   }
 
+  /**
+   *
+   * @param inverse
+   */
   setInverse(inverse: boolean) {
     this.options.inverse = inverse
     this.draw()
   }
 
+  /**
+   *
+   * @param colors
+   */
   setColors(colors: {[edgeWeight: number]: string}) {
     this.options.colors = colors
     this.draw()
   }
 
+  /**
+   *
+   * @param opacity
+   */
   setOpacity(opacity: number) {
     this.options.opacity = opacity
 
@@ -110,6 +140,10 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     }
   }
 
+  /**
+   *
+   * @param strokeWidth
+   */
   setStrokeWidth(strokeWidth: number) {
     this.options.strokeWidth = strokeWidth
     this.draw()

@@ -77,28 +77,47 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     // this.divElement = null
   }
 
+  /**
+   *
+   * @param multipolygon
+   */
   setData(multipolygon: MultipolygonData[]) {
     this.readyPromise.then(() => {
       this.element.setData(multipolygon)
     })
   }
 
+  /**
+   *
+   */
   draw() {
     if (this.element) {
       this.element.draw()
     }
   }
 
+  /**
+   *
+   * @param inverse
+   */
   setInverse(inverse: boolean) {
     this.options.inverse = inverse
     this.draw()
   }
 
+  /**
+   *
+   * @param colors
+   */
   setColors(colors: {[edgeWeight: number]: string}) {
     this.options.colors = colors
     this.draw()
   }
 
+  /**
+   *
+   * @param opacity
+   */
   setOpacity(opacity: number) {
     this.options.opacity = opacity
 
@@ -108,6 +127,10 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     }
   }
 
+  /**
+   *
+   * @param strokeWidth
+   */
   setStrokeWidth(strokeWidth: number) {
     this.options.strokeWidth = strokeWidth
     this.draw()
