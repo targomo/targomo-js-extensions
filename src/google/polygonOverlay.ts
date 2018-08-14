@@ -11,7 +11,7 @@ export class GoogleMapsPolygonOverlayOptions extends svg.PolygonRenderOptionsDat
 }
 
 /**
- *
+ * Icochrome layer for google maps
  */
 export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   private element: PolygonOverlayElement
@@ -30,9 +30,6 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     this.setMap(map)
   }
 
-  /**
-   *
-   */
   onAdd() {
     const map = this.map
     const overlayProjection = this.getProjection()
@@ -69,9 +66,6 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     this.readyResolve()
   }
 
-  /**
-   *
-   */
   onRemove() {
     // this.divElement.parentNode.removeChild(this.divElement)
     // this.divElement = null
@@ -90,10 +84,12 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   /**
    *
    */
-  draw() {
-    if (this.element) {
-      this.element.draw()
-    }
+  draw(immediately: boolean = false) {
+    this.readyPromise.then(() => {
+      if (this.element) {
+        this.element.draw(immediately)
+      }
+    })
   }
 
   /**
@@ -102,7 +98,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    */
   setInverse(inverse: boolean) {
     this.options.inverse = inverse
-    this.draw()
+    this.draw(true)
   }
 
   /**
@@ -111,7 +107,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    */
   setColors(colors: {[edgeWeight: number]: string}) {
     this.options.colors = colors
-    this.draw()
+    this.draw(true)
   }
 
   /**
@@ -121,10 +117,12 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   setOpacity(opacity: number) {
     this.options.opacity = opacity
 
-    if (this.element) {
-      const div = this.element.getElement()
-      div.style.opacity = '' + this.options.opacity || '0.5'
-    }
+    this.readyPromise.then(() => {
+      if (this.element) {
+        const div = this.element.getElement()
+        div.style.opacity = '' + this.options.opacity || '0.5'
+      }
+    })
   }
 
   /**
@@ -133,6 +131,6 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    */
   setStrokeWidth(strokeWidth: number) {
     this.options.strokeWidth = strokeWidth
-    this.draw()
+    this.draw(true)
   }
 }

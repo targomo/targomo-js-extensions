@@ -20,15 +20,13 @@ export class PolygonOverlayElement {
   bounds: BoundingBox
   private model: ProjectedMultiPolygon
   private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
-  private options: svg.PolygonRenderOptionsData
 
   /**
    *
    * @param map
    */
   constructor(private plugin: PolygonOverlayElementPlugin,
-              options?: Partial<svg.PolygonRenderOptionsData>) {
-    this.options = Object.assign(new svg.PolygonRenderOptionsData(), options || {})
+              private options: svg.PolygonRenderOptionsData) {
   }
 
   getElement() {
@@ -38,9 +36,14 @@ export class PolygonOverlayElement {
   /**
    *
    */
-  draw() {
+  draw(immediately: boolean = false) {
     this.resize()
-    this.renderTimeout.schedule(() => this.render())
+
+    if (immediately) {
+      this.render()
+    } else {
+      this.renderTimeout.schedule(() => this.render())
+    }
   }
 
   private resize() {
