@@ -120,7 +120,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     this.readyPromise.then(() => {
       if (this.element) {
         const div = this.element.getElement()
-        div.style.opacity = '' + this.options.opacity || '0.5'
+        div.style.opacity = this.options.opacity != null ? ('' + this.options.opacity) : '0.5'
       }
     })
   }
