@@ -127,6 +127,7 @@ export function render(viewport: ProjectedBounds,
       children.push(renderPath(svgData, {
         ...polygonOption,
         strokeWidth: options.strokeWidth,
+        color: options.inverse ? 'black' : polygonOption.color
       }))
     }
   })
