@@ -1,13 +1,13 @@
 {
-  "name": "@targomo/googlemaps",
+  "name": "@targomo/js-extensions",
   "description": "The JavaScript (& TypeScript) API for Targomo's time-based access mapping services.",
   "author": "Targomo",
   "version": "0.0.1",
   "license": "MIT",
-  "repository": "github:targomo/targomo-js-googlemaps",
+  "repository": "github:targomo/targomo-js-extensions",
   "homepage": "https://targomo.com/developers",
   "bugs": {
-    "url": "https://github.com/targomo/targomo-js-googlemaps/issues"
+    "url": "https://github.com/targomo/targomo-js-extensions/issues"
   },
   "keywords": [
     "map",
