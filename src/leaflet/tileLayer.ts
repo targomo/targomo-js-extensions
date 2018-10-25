@@ -18,8 +18,7 @@ export class TgmLeafletTileLayer extends L.TileLayer {
 
     static getTileLayerList(tgmClient: TargomoClient): {[basemapName: string]: TgmLeafletTileLayer} {
         const tileLayerList: {[basemapName: string]: TgmLeafletTileLayer} = {}
-
-        tgmClient.basemaps.getBasemapList().forEach(basemapName => {
+        tgmClient.basemaps.basemapNames.forEach(basemapName => {
             tileLayerList[basemapName] = new TgmLeafletTileLayer(tgmClient, basemapName, {});
         });
         return tileLayerList;
