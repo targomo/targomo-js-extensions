@@ -1,8 +1,8 @@
 import * as geometry from '../geometry/projection'
 import { ProjectedMultiPolygon, ProjectedPolygon, ProjectedPoint, ProjectedBounds } from '../geometry/projectedPolygon';
 import * as simplify from '../geometry/clip'
-import * as collinear from '../geometry/collinear'
-import { PolygonRenderOptionsData, PolygonRenderOptions } from './options'
+// import * as collinear from '../geometry/collinear'
+import { PolygonRenderOptions } from './options'
 export { PolygonRenderOptionsData } from './options'
 
 let idCounter = 0

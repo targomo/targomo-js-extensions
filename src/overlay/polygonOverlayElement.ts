@@ -143,7 +143,7 @@ export class PolygonOverlayElement {
   }
 
   private render() {
-    const inverse = this.options.inverse
+    // const inverse = this.options.inverse
 
     if (!this.model || !this.divElement) {
       return
@@ -156,9 +156,7 @@ export class PolygonOverlayElement {
     const growFactor = Math.min(5, Math.max(2, (zoom - 12) / 2))
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
-    const now = new Date().getTime()
     const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
-    // console.log('**** PROCESSING TIME ****', new Date().getTime() - now)
 
     this.divElement.innerHTML = result
 
