@@ -96,12 +96,16 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     if (animated) {
       map.on('zoomanim', (e: L.ZoomAnimEvent) => {
         if (this.element.bounds) {
+
           const scale = map.getZoomScale(e.zoom, map.getZoom())
 
-          const latLng = new L.LatLng((this.element.bounds.southWest.lat + this.element.bounds.northEast.lat) / 2,
-                                      (this.element.bounds.southWest.lng + this.element.bounds.northEast.lng) / 2)
-          const pos = (map as any)._latLngToNewLayerPoint(latLng, e.zoom, e.center).round()
-          const cur = (map as any)._latLngToNewLayerPoint(latLng, map.getZoom(), map.getCenter()).round()
+          const pos1 = (map as any)._latLngToNewLayerPoint(this.element.bounds.southWest, e.zoom, e.center).round()
+          const pos2 = (map as any)._latLngToNewLayerPoint(this.element.bounds.northEast, e.zoom, e.center).round()
+          const cur1 = (map as any)._latLngToNewLayerPoint(this.element.bounds.southWest, map.getZoom(), map.getCenter()).round()
+          const cur2  = (map as any)._latLngToNewLayerPoint(this.element.bounds.northEast, map.getZoom(), map.getCenter()).round()
+
+          const pos = {x: (pos1.x + pos2.x) / 2, y: (pos1.y + pos2.y) / 2}
+          const cur = {x: (cur1.x + cur2.x) / 2, y: (cur1.y + cur2.y) / 2}
 
           L.DomUtil.setTransform(div, new L.Point(pos.x - cur.x, pos.y - cur.y), scale)
         }
