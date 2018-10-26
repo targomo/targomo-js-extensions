@@ -1,6 +1,6 @@
 {
   "name": "@targomo/leaflet",
-  "description": "The JavaScript (& TypeScript) API for Targomo's time-based access mapping services.",
+  "description": "Leaflet maps extensions for Targomo's time-based access mapping services.",
   "main": "targomo-leaflet.js",
   "module": "targomo-leaflet.js",
   "browser": "targomo-leaflet.umd.min.js",

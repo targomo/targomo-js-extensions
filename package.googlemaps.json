@@ -1,6 +1,6 @@
 {
   "name": "@targomo/googlemaps",
-  "description": "The JavaScript (& TypeScript) API for Targomo's time-based access mapping services.",
+  "description": "Google maps extensions for for Targomo's time-based access mapping services.",
   "main": "targomo-googlemaps.js",
   "module": "targomo-googlemaps.js",
   "browser": "targomo-googlemaps.umd.min.js",
