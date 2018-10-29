@@ -11,20 +11,14 @@ function constructLayer() {
 
     getViewPort(): ProjectedBoundsData {
       return new ProjectedBounds({
-        northEast: geometry.latLngToWebMercator({
-          lat: 52.6300,
-          lng: 13.050,
-        }),
-        southWest: geometry.latLngToWebMercator({
-          lat: 52.2300,
-          lng: 13.6050,
-        })
+        northEast: geometry.latLngToWebMercator({lat: 52.554854904263216, lng: 13.529663085937502}),
+        southWest: geometry.latLngToWebMercator({lat: 52.47922565896137, lng: 13.216552734375002})
       })
     },
 
     getElementPixels(bounds: BoundingBox): ProjectedBoundsData {
-      const northEast = {y: 0, x: 0}
-      const southWest = {y: 1, x: 1}
+      const northEast = {x: 2503, y: -199}
+      const southWest = {x: -1145, y: 1249}
 
       return {northEast, southWest}
     }
@@ -45,19 +39,28 @@ describe('abstract layer', () => {
 
 
   test('render', () => {
+    const data: [number, number][] = [
+      [1487953, 6892934],
+      [1487953, 6892534],
+      [1487553, 6892534],
+      [1487953, 6892934],
+    ]
+
+
     const layer = constructLayer()
     layer.initElement()
     layer.setData([{
       polygons: [{
         area: 100,
         travelTime: 100,
-        outerBoundary: [[52.5300, 13.4050], [52.5200, 13.4050], [52.5300, 13.4000], [52.5300, 13.4050]],
+        outerBoundary: data,
         innerBoundary: []
       }]
     }])
 
 
     expect(layer.getElement()).toBeTruthy()
-    // expect(layer.getElement().innerHTML).toContain('<svg')
+    expect(layer.getElement().innerHTML).toContain('<svg')
+    expect(layer.getElement().innerHTML).toContain('<path')
   })
 })
