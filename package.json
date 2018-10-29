@@ -26,9 +26,8 @@
     "build": "npm run clean && node build.js",
     "lint": "tslint -p tsconfig.json",
     "clean": "shx rm -rf dist",
-    "test": "npm run test:browser && npm run test:node",
+    "test": "npm run test:browser && npm run test:browser",
     "test:browser": "jest --config=jest.config.json --env=jsdom",
-    "test:node": "jest --config=jest.config.json --env=node",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config=jest.config.json",
     "test:coverage": "npm run test:browser && npm run test:node --coverage"
   },
