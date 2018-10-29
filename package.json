@@ -29,7 +29,7 @@
     "test": "npm run test:browser && npm run test:browser",
     "test:browser": "jest --config=jest.config.json --env=jsdom",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config=jest.config.json",
-    "test:coverage": "npm run test:browser && npm run test:node --coverage"
+    "test:coverage": "npm run test:browser --coverage"
   },
   "devDependencies": {
     "@types/jest": "^21.1.5",
