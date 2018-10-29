@@ -12,11 +12,11 @@ lint:
   script:
     - npm run lint
 
-# test_and_coverage:
-#   stage: test
-#   script:
-#     - ls
-#     - npm run test:coverage
+test_and_coverage:
+  stage: test
+  script:
+    - ls
+    - npm run test:coverage
     
 build_release:
   stage: build
