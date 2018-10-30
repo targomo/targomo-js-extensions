@@ -56,7 +56,7 @@ function mergePackage(which, destination) {
   fs.writeFileSync(paths.join(__dirname, destination), JSON.stringify(merged))
 }
 
-function buildTarget(which) {
+async function buildTarget(which) {
   const indexFile = `./src/index.${which}.ts`
   const targetFile = `targomo-${which}`
   const targetVariable = `tgm.${which}`
@@ -79,63 +79,63 @@ function buildTarget(which) {
   // --- BROWSER ---
 
   // Regular bundle
-  rollup.rollup({
+  const bundle = await rollup.rollup({
     input: indexFile,
     external,
     context: 'window',
     plugins: defaultPlugins,
-  }).then(bundle => {
-    return bundle.write({
-      globals,
-      name: targetVariable,
-      sourcemap: true,
-      format: 'umd',
-      banner: getBanner(),
-      file: distFolder +  targetFile + '.umd.js'
-    })
-  }).then(() => {
-    let bannercomment0 = false;
+  })
+
+  await bundle.write({
+    globals,
+    name: targetVariable,
+    sourcemap: true,
+    format: 'umd',
+    banner: getBanner(),
+    file: distFolder +  targetFile + '.umd.js'
+  })
+
+  let bannercomment0 = false;
 
     // Minified bundle
-    return rollup.rollup({
-      input: indexFile,
-      external,
-      context: 'window',
-      plugins: [
-        ...defaultPlugins,
-        uglify({
-          output: {
-            comments: function (node, comment) {
-              var text = comment.value
-              var type = comment.type
-              if (type == "comment2") {
-                // multiline comment
-                const show = !bannercomment0
-                bannercomment0 = true
-                return show
-              }
+  const bundleMin = await rollup.rollup({
+    input: indexFile,
+    external,
+    context: 'window',
+    plugins: [
+      ...defaultPlugins,
+      uglify({
+        output: {
+          comments: function (node, comment) {
+            var text = comment.value
+            var type = comment.type
+            if (type == "comment2") {
+              // multiline comment
+              const show = !bannercomment0
+              bannercomment0 = true
+              return show
             }
           }
-        }),
-        // copy({
-        //   "./package.json" : distFolder + `package.json`,
-        //   // './dist/typings' : distFolder,
-        //   verbose: true
-        // })
-      ],
-    })
-  }).then(bundle => {
-    return bundle.write({
-      globals,
-      name: targetVariable,
-      sourcemap: true,
-      format: 'umd',
-      banner: getBanner(),
-      file: distFolder + targetFile + '.umd.min.js',
-    })
-  }).then(() => {
-    mergePackage(which, distFolder + `package.json`)
+        }
+      }),
+      // copy({
+      //   "./package.json" : distFolder + `package.json`,
+      //   // './dist/typings' : distFolder,
+      //   verbose: true
+      // })
+    ],
   })
+
+  await bundleMin.write({
+    globals,
+    name: targetVariable,
+    sourcemap: true,
+    format: 'umd',
+    banner: getBanner(),
+    file: distFolder + targetFile + '.umd.min.js',
+  })
+
+  mergePackage(which, distFolder + `package.json`)  
 }
 
 

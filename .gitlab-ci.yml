@@ -15,7 +15,6 @@ lint:
 test_and_coverage:
   stage: test
   script:
-    - ls
     - npm run test:coverage
     
 build_release:
