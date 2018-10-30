@@ -6,7 +6,9 @@ const resolve = require('rollup-plugin-node-resolve')
 const commonjs = require('rollup-plugin-commonjs')
 const fs = require('fs')
 const paths = require('path')
+const fsExtra = require('fs-extra')
 
+const curVersionString = require("./package.json").version
 const curVersion = JSON.stringify(require("./package.json").version)
 const curYear = new Date().getFullYear()
 const author = require("./package.json").author || ''
@@ -31,6 +33,18 @@ function getBanner() {
 * (c) ${curYear} ${author}
 */`
 }
+
+async function mergeFullVersion(source, withLib, destination) {
+  source = paths.resolve(__dirname, source)
+  destination = paths.resolve(__dirname, destination)
+  withLib = paths.resolve(__dirname, 'node_modules', '@targomo', 'core', withLib)
+
+  const libData = fs.readFileSync(withLib).toString('utf-8')
+  const sourceData = fs.readFileSync(source).toString('utf-8')
+
+  fs.writeFileSync(destination, [libData, sourceData].join('\n\n\n'))
+}
+
 
 function mergePackage(which, destination) {
   const mainPackage = require('./package.json')
@@ -95,6 +109,8 @@ async function buildTarget(which) {
     file: distFolder +  targetFile + '.umd.js'
   })
 
+  mergeFullVersion(distFolder + targetFile + '.umd.js', 'targomo-core.umd.js', distFolder + targetFile + '-full.umd.js')
+
   let bannercomment0 = false;
 
     // Minified bundle
@@ -135,7 +151,21 @@ async function buildTarget(which) {
     file: distFolder + targetFile + '.umd.min.js',
   })
 
+  mergeFullVersion(distFolder + targetFile + '.umd.min.js', 'targomo-core.umd.min.js', distFolder + targetFile + '-full.umd.min.js')
+
   mergePackage(which, distFolder + `package.json`)  
+
+
+  const releaseFolder = paths.resolve(__dirname, 'dist', 'releases', 'javascript', targetFile)
+  fsExtra.ensureDirSync(releaseFolder)
+
+  const postfixes = [['', ''], ['', '.min'], ['-full', ''], ['-full', '.min']]
+  postfixes.forEach((pair) => {
+    const prefix = pair[0]
+    const postfix = pair[1]
+    fsExtra.copySync(paths.resolve(__dirname, distFolder, targetFile + `${prefix}.umd${postfix}.js`), paths.join(releaseFolder, `latest${prefix}${postfix}.js`))
+    fsExtra.copySync(paths.resolve(__dirname, distFolder, targetFile + `${prefix}.umd${postfix}.js`), paths.join(releaseFolder, `${curVersionString}${prefix}${postfix}.js`))
+  })
 }
 
 
