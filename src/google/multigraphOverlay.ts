@@ -1,5 +1,6 @@
 
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions, SimpleLRU, RequestsUtil } from '@targomo/core';
+import { SimpleCache } from '../util/cache';
 
 interface TileData {
   jsonData: any,
@@ -7,38 +8,7 @@ interface TileData {
 
 interface TileRendered {
   data: google.maps.Data,
-  circles: google.maps.Circle[],
   tileData: TileData,
-}
-
-export class SimpleCache<T> {
-  private map: {[index: string]: Promise<T>} = {}
-
-  async get(key: any, factory?: () => Promise<T>): Promise<T> {
-    let keyString: string
-
-    if (typeof key === 'string') {
-      keyString = key
-    } else {
-      keyString = JSON.stringify(key)
-    }
-
-    if (this.map[keyString] !== undefined) {
-      return await this.map[keyString]
-    } else {
-      const promise = factory()
-      this.map[keyString] = promise
-      try {
-        return await promise
-      } catch (e) {
-        this.map[keyString] = undefined
-      }
-    }
-  }
-
-  entries() {
-    return Object.values(this.map)
-  }
 }
 
 /**
@@ -69,8 +39,8 @@ export class SimpleCache<T> {
 export class MultigraphOverlay implements google.maps.MapType {
   private options: any;
   private config: string;
-  private renderedCache = new SimpleCache<TileRendered>()
-  private requestCache = new SimpleLRU<TileData>(200)
+  private visibleTiles = new SimpleCache<TileRendered>()
+  private requestCache = new SimpleLRU<TileData>(100)
 
   constructor(
     private map: google.maps.Map,
@@ -85,76 +55,39 @@ export class MultigraphOverlay implements google.maps.MapType {
     this.config = encodeURIComponent(JSON.stringify(this.options));
 
     // Remove everything from the map when you zoom, getTile will automatically be called to redraw the correct data
-    this.map.addListener('zoom_changed', () => {
+    this.map.addListener('zoom_changed', async () => {
 
       // Remove shapes from map
-      this.renderedCache.entries().forEach(async promise => {
-        const entry = await promise
-        entry.circles.forEach(circle => circle.setMap(null))
+      const currentTiles = this.visibleTiles
+      this.visibleTiles = new SimpleCache<TileRendered>()
+      const entries = await currentTiles.entries()
+      entries.forEach(entry => {
         if (entry.data) {
           entry.data.setMap(null)
         }
       })
-
-      this.renderedCache = new SimpleCache<TileRendered>()
     });
   }
 
   getTile(coord: { x: number, y: number }, zoom: number): Element {
     const key = `tile@${zoom}@${coord.x}@${coord.y}`
-    this.renderedCache.get(key, () => this.getAndRenderTile(coord, zoom))
+    this.visibleTiles.get(key, () => this.getAndRenderTile(coord, zoom))
     return null
   }
 
   private async getAndRenderTile(coord: { x: number, y: number }, zoom: number) {
-    // First check if this tile is already loaded in the cache
     const tileData = await this.fetchTile(coord, zoom)
-
-    // Again, because of the memory usage issues, I am removing all the circles in the zoom_changed event listener
-    // and recreating it here, otherwise the browser crashes because of memory usage after scrolling in and out
-    // ~10 times
-
     const tile: TileRendered = {
       tileData,
       data: null,
-      circles: []
     }
 
-    // const now = new Date().getTime()
-    if (this.options.multigraph.layer.type.toUpperCase() === 'NODE-disabled-for-now') {
-      setTimeout(() => {
-        tileData.jsonData.features.forEach((point: any) => {
-
-          // This part is so that circle styling can use the dynamic styling thingy like:
-          // feature.getProperty('w')
-          // in the same way as the styling for geojson, so that the user doesnt have to change the styling object
-          // when switching from hexagon/tile/edge to node
-          point.getProperty = (key: string) => {
-            return point.properties[key];
-          }
-
-          let style = this.styleOptions as google.maps.CircleOptions;
-          if ((style as any).call) {
-            style = (this.styleOptions as any)(point);
-          };
-
-          const circle = new google.maps.Circle({
-            ...style,
-            center: { lat: point.geometry.coordinates[1], lng: point.geometry.coordinates[0] },
-            map: this.map
-          })
-
-          tile.circles.push(circle);
-        });
-      }, Math.random() * 100)
-    } else {
-      const data = new google.maps.Data({style: this.styleOptions});
-      data.addGeoJson(tileData.jsonData);
-      tile.data = data
-      setTimeout(() => {
-        data.setMap(this.map)
-      })
-    }
+    const data = new google.maps.Data({style: this.styleOptions});
+    data.addGeoJson(tileData.jsonData);
+    tile.data = data
+    setTimeout(() => {
+      data.setMap(this.map)
+    })
 
     return tile
   }
@@ -170,12 +103,6 @@ export class MultigraphOverlay implements google.maps.MapType {
       const requests = new RequestsUtil()
       let jsonData = await requests.fetchData(tileUrl)
 
-      // Don't 100 percent get it, but because the mvt tile format requires some overlap in the hexagons
-      // (to prevent hexagons from not showing on the edges between tiles).
-      // And for some reason this overlap is also in the geojson format.
-      // So here we manually check each hexagon to see if it is actually inside the current tile and
-      // only show the hexagons which are inside the tile
-
       if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
         jsonData.features.forEach((feature: any) => {
           feature.geometry.type = 'POLYGON'
@@ -185,10 +112,14 @@ export class MultigraphOverlay implements google.maps.MapType {
 
           feature.geometry.coordinates = polygon
         })
-      }
-
-      if (this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON' ||
+      } else if (this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON' ||
           this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON_NODE') {
+
+        // Don't 100 percent get it, but because the mvt tile format requires some overlap in the hexagons
+        // (to prevent hexagons from not showing on the edges between tiles).
+        // And for some reason this overlap is also in the geojson format.
+        // So here we manually check each hexagon to see if it is actually inside the current tile and
+        // only show the hexagons which are inside the tile
 
         const newJsonData: { type: string, features: any[] } = { type: 'FeatureCollection', features: [] }
         jsonData.features.forEach((feature: any) => {
