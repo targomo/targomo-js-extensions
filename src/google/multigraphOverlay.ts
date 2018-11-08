@@ -2,13 +2,10 @@
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions, SimpleLRU, RequestsUtil } from '@targomo/core';
 import { SimpleCache } from '../util/cache';
 
-interface TileData {
-  jsonData: any,
-}
 
 interface TileRendered {
   data: google.maps.Data,
-  tileData: TileData,
+  tileData: any,
 }
 
 /**
@@ -37,10 +34,10 @@ interface TileRendered {
   this.map.overlayMapTypes.setAt(0, multigraphOverlay);
  */
 export class MultigraphOverlay implements google.maps.MapType {
-  private options: any;
+  private options: any // MultigraphRequestOptions & {sources: LatLngIdTravelMode[]}
   private config: string;
   private visibleTiles = new SimpleCache<TileRendered>()
-  private requestCache = new SimpleLRU<TileData>(100)
+  private requestCache = new SimpleLRU<any>(100)
 
   constructor(
     private map: google.maps.Map,
@@ -76,14 +73,14 @@ export class MultigraphOverlay implements google.maps.MapType {
   }
 
   private async getAndRenderTile(coord: { x: number, y: number }, zoom: number) {
-    const tileData = await this.fetchTile(coord, zoom)
+    const jsonData = await this.fetchTile(coord, zoom)
     const tile: TileRendered = {
-      tileData,
+      tileData: jsonData,
       data: null,
     }
 
     const data = new google.maps.Data({style: this.styleOptions});
-    data.addGeoJson(tileData.jsonData);
+    data.addGeoJson(jsonData);
     tile.data = data
     setTimeout(() => {
       data.setMap(this.map)
@@ -96,7 +93,7 @@ export class MultigraphOverlay implements google.maps.MapType {
   private fetchTile(coord: { x: number, y: number }, zoom: number) {
     const baseUrl = 'https://api.targomo.com/westcentraleurope/v1/multigraph/' // TODO get from client
     const tileUrl = baseUrl + zoom + '/' + coord.x + '/' + coord.y + '.geojson' +
-                    '?key=' + this.client.serviceKey +
+                    '?key=' + encodeURIComponent(this.client.serviceKey) +
                     '&cfg=' + this.config
 
     return this.requestCache.get(tileUrl, async () => {
@@ -104,6 +101,7 @@ export class MultigraphOverlay implements google.maps.MapType {
       let jsonData = await requests.fetchData(tileUrl)
 
       if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
+        // Points are difficult to style in google maps so instead we are converting to single point polygons
         jsonData.features.forEach((feature: any) => {
           feature.geometry.type = 'POLYGON'
           const polygon = [[
@@ -176,9 +174,7 @@ export class MultigraphOverlay implements google.maps.MapType {
         jsonData = newJsonData;
       }
 
-      return {
-        jsonData: jsonData,
-      }
+      return jsonData
     })
   }
 
