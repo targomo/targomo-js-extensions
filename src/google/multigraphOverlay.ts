@@ -1,5 +1,45 @@
 
-import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions } from '@targomo/core';
+import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions, SimpleLRU } from '@targomo/core';
+
+interface TileData {
+  x: number
+  y: number,
+  zoom: number,
+  data: google.maps.Data,
+  circles: google.maps.Circle[],
+  jsonData: any,
+
+}
+
+export class SimpleCache<T> {
+  private map: {[index: string]: Promise<T>} = {}
+
+  async get(key: any, factory?: () => Promise<T>): Promise<T> {
+    let keyString: string
+
+    if (typeof key === 'string') {
+      keyString = key
+    } else {
+      keyString = JSON.stringify(key)
+    }
+
+    if (this.map[keyString] !== undefined) {
+      return await this.map[keyString]
+    } else {
+      const promise = factory()
+      this.map[keyString] = promise
+      try {
+        return await promise
+      } catch (e) {
+        this.map[keyString] = undefined
+      }
+    }
+  }
+
+  entries() {
+    return Object.values(this.map)
+  }
+}
 
 /**
  * use it like:
@@ -29,7 +69,8 @@ import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions } from '@ta
 export class MultigraphOverlay implements google.maps.MapType {
   options: any;
   config: string;
-  cache: any[];
+  cache = new SimpleCache<TileData>()
+  // requestCache = new SimpleLRU<TileData>(200)
 
   constructor(
     private map: google.maps.Map,
@@ -44,90 +85,110 @@ export class MultigraphOverlay implements google.maps.MapType {
     this.config = encodeURIComponent(JSON.stringify(this.options));
 
     // Used to save results, so that you dont re-send requests everytime you zoom
-    this.cache = [];
+    // this.cache = [];
 
     // Remove everything from the map when you zoom, getTile will automatically be called to redraw the correct data
     this.map.addListener('zoom_changed', () => {
-      for (let i in this.cache) {
-        this.cache[i].loaded = false;
 
-        this.cache[i].data.setMap(null)
+      // Remove shapes from map
+      this.cache.entries().forEach(async promise => {
+        const entry = await promise
+        entry.circles.forEach(circle => circle.setMap(null))
+        entry.data.setMap(null)
+      })
 
-        // For some reason when you just use circle.setMap(null); without completely removing it,
-        // and then zooming in and out a couple times, memory use will build up really fast
-        // So thats why I am completely removing them. And in getTile new circles are created again.
-        this.cache[i].circles.forEach((circle: google.maps.Circle) => {
-          circle.setMap(null);
-          circle = null;
-        })
-        this.cache[i].circles = [];
-      }
+      this.cache = new SimpleCache<TileData>()
+
+      // TODO: get back to this
+      // for (let i in this.cache) {
+      //   this.cache[i].loaded = false;
+
+      //   this.cache[i].data.setMap(null)
+
+      //   // For some reason when you just use circle.setMap(null); without completely removing it,
+      //   // and then zooming in and out a couple times, memory use will build up really fast
+      //   // So thats why I am completely removing them. And in getTile new circles are created again.
+      //   this.cache[i].circles.forEach((circle: google.maps.Circle) => {
+      //     circle.setMap(null);
+      //     circle = null;
+      //   })
+      //   this.cache[i].circles = [];
+      // }
     });
   }
 
   getTile(coord: { x: number, y: number }, zoom: number): Element {
+    const key = `tile@${zoom}@${coord.x}@${coord.y}`
+    console.log('REQUEST KEY', key)
+    this.cache.get(key, async () => {
+      console.log('LOAD KEY', key)
+      const result = await this.getAndRenderTile(coord, zoom)
+      console.log('RESULS', result)
+      return result
+    })
+
+    return null
+  }
+
+  private async getAndRenderTile(coord: { x: number, y: number }, zoom: number) {
     // First check if this tile is already loaded in the cache
+    const tile = await this.fetchTile(coord, zoom)
     const nowMain = new Date().getTime()
-    let found = false;
-    for (let i in this.cache) {
-      if (!found && this.cache[i].x === coord.x && this.cache[i].y === coord.y && this.cache[i].zoom === zoom) {
-        found = true;
-        // Only add it to the map if this tile is not loaded (added to the map) yet
-        if (!this.cache[i].loaded) {
+    console.log('BEGIN>>>>>>>>>>>>>>>>>>>>>>>>')
+    console.log('TILE', tile)
 
-          // This xmlHttpRequest doesnt do much, but for some reason, it seems to be less stutter-ey
-          // when zooming in and out (checking the cache and visualizing what it found.) Probably because of threading/async..
-          // We have to find a better solution for this.
-          // I tried a couple other ways of making this async but I didnt get the same results,
-          // I guess the async of xmlhttp is different in some way
-          // const xmlhttp = new XMLHttpRequest();
-          // xmlhttp.onreadystatechange = (e) => {
-          //   if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+    // This xmlHttpRequest doesnt do much, but for some reason, it seems to be less stutter-ey
+    // when zooming in and out (checking the cache and visualizing what it found.) Probably because of threading/async..
+    // We have to find a better solution for this.
+    // I tried a couple other ways of making this async but I didnt get the same results,
+    // I guess the async of xmlhttp is different in some way
+    // const xmlhttp = new XMLHttpRequest();
+    // xmlhttp.onreadystatechange = (e) => {
+    //   if (xmlhttp.readyState == XMLHttpRequest.DONE) {
 
-              // Again, because of the memory usage issues, I am removing all the circles in the zoom_changed event listener
-              // and recreating it here, otherwise the browser crashes because of memory usage after scrolling in and out
-              // ~10 times
-              const now = new Date().getTime()
-              if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
-                this.cache[i].jsonData.features.forEach((point: any) => {
+    // Again, because of the memory usage issues, I am removing all the circles in the zoom_changed event listener
+    // and recreating it here, otherwise the browser crashes because of memory usage after scrolling in and out
+    // ~10 times
 
-                  // This part is so that circle styling can use the dynamic styling thingy like:
-                  // feature.getProperty('w')
-                  // in the same way as the styling for geojson, so that the user doesnt have to change the styling object
-                  // when switching from hexagon/tile/edge to node
-                  point.getProperty = (key: string) => {
-                    return point.properties[key];
-                  }
-                  let style = this.styleOptions as google.maps.CircleOptions;
-                  if ((style as any).call) {
-                    style = (this.styleOptions as any)(point);
-                  };
-                  const circle = new google.maps.Circle({
-                    ...style,
-                    center: { lat: point.geometry.coordinates[1], lng: point.geometry.coordinates[0] },
-                  })
-                  this.cache[i].circles.push(circle);
-                  circle.setMap(this.map);
-                });
-              } else {
-                this.cache[i].data.setMap(this.map)
-              }
+    // const now = new Date().getTime()
+    if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
+      console.log('FEATURESLENGTH', tile.jsonData.features.length)
+      tile.jsonData.features.forEach((point: any) => {
 
-              this.cache[i].loaded = true;
-              console.log('TIME', new Date().getTime() - now)
-            // }
-          // };
-          // xmlhttp.open('GET', '', true);
-          // xmlhttp.send();
+        // This part is so that circle styling can use the dynamic styling thingy like:
+        // feature.getProperty('w')
+        // in the same way as the styling for geojson, so that the user doesnt have to change the styling object
+        // when switching from hexagon/tile/edge to node
+        point.getProperty = (key: string) => {
+          return point.properties[key];
         }
-      }
-      console.log('TIME MAIN', new Date().getTime() - nowMain)
+
+        let style = this.styleOptions as google.maps.CircleOptions;
+        if ((style as any).call) {
+          style = (this.styleOptions as any)(point);
+        };
+
+        const circle = new google.maps.Circle({
+          ...style,
+          center: { lat: point.geometry.coordinates[1], lng: point.geometry.coordinates[0] },
+          map: this.map
+        })
+
+        tile.circles.push(circle);
+        // circle.setMap(this.map);
+      });
+    } else {
+      tile.data.setMap(this.map)
     }
 
-    // Only make a request if the tile is not found in the cache.
-    if (!found) {
+    console.log('TIME MAIN', new Date().getTime() - nowMain)
+    return tile
+  }
+
+
+  private fetchTile(coord: { x: number, y: number }, zoom: number) {
+    return new Promise<TileData>((resolve, reject) => {
       const data = new google.maps.Data();
-      const circles: any[] = [];
       data.setStyle(this.styleOptions);
 
       const tileUrl = 'https://api.targomo.com/westcentraleurope/v1/multigraph/' + zoom + '/' + coord.x + '/' + coord.y + '.geojson' +
@@ -138,6 +199,7 @@ export class MultigraphOverlay implements google.maps.MapType {
       xmlhttp.onreadystatechange = (e) => {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
           if (xmlhttp.status == 200) {
+            const now = new Date().getTime()
             let jsonData = JSON.parse(xmlhttp.response).data;
 
             // Don't 100 percent get it, but because the mvt tile format requires some overlap in the hexagons
@@ -203,29 +265,31 @@ export class MultigraphOverlay implements google.maps.MapType {
               jsonData = newJsonData;
             }
 
+            console.log('PROCESSING TIME, ', new Date().getTime() - now)
+
             // Not when node, because circles are always re-added on every getTile request (for memory usage reasons)
             if (this.options.multigraph.layer.type.toUpperCase() !== 'NODE') {
               data.addGeoJson(jsonData);
             }
 
-            this.cache.push({
+            resolve({
               x: coord.x,
               y: coord.y,
               zoom: zoom,
               data: data,
-              circles: circles,
+              circles: [],
               jsonData: jsonData,
-              loaded: false
             })
-            this.getTile(coord, zoom);
+          } else {
+            reject()
           }
         }
-      };
+      }
+
       xmlhttp.open('GET', tileUrl, true);
       xmlhttp.send();
-    }
+    })
 
-    return null;
   }
 
   releaseTile(): void { }
