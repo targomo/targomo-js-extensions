@@ -84,9 +84,6 @@ export class MultigraphOverlay implements google.maps.MapType {
     // Attatched to the requests as &cfg=
     this.config = encodeURIComponent(JSON.stringify(this.options));
 
-    // Used to save results, so that you dont re-send requests everytime you zoom
-    // this.cache = [];
-
     // Remove everything from the map when you zoom, getTile will automatically be called to redraw the correct data
     this.map.addListener('zoom_changed', () => {
 
@@ -100,22 +97,6 @@ export class MultigraphOverlay implements google.maps.MapType {
       })
 
       this.renderedCache = new SimpleCache<TileRendered>()
-
-      // TODO: get back to this
-      // for (let i in this.cache) {
-      //   this.cache[i].loaded = false;
-
-      //   this.cache[i].data.setMap(null)
-
-      //   // For some reason when you just use circle.setMap(null); without completely removing it,
-      //   // and then zooming in and out a couple times, memory use will build up really fast
-      //   // So thats why I am completely removing them. And in getTile new circles are created again.
-      //   this.cache[i].circles.forEach((circle: google.maps.Circle) => {
-      //     circle.setMap(null);
-      //     circle = null;
-      //   })
-      //   this.cache[i].circles = [];
-      // }
     });
   }
 
@@ -140,7 +121,7 @@ export class MultigraphOverlay implements google.maps.MapType {
     }
 
     // const now = new Date().getTime()
-    if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
+    if (this.options.multigraph.layer.type.toUpperCase() === 'NODE-disabled-for-now') {
       setTimeout(() => {
         tileData.jsonData.features.forEach((point: any) => {
 
@@ -194,6 +175,18 @@ export class MultigraphOverlay implements google.maps.MapType {
       // And for some reason this overlap is also in the geojson format.
       // So here we manually check each hexagon to see if it is actually inside the current tile and
       // only show the hexagons which are inside the tile
+
+      if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
+        jsonData.features.forEach((feature: any) => {
+          feature.geometry.type = 'POLYGON'
+          const polygon = [[
+            feature.geometry.coordinates, feature.geometry.coordinates, feature.geometry.coordinates
+          ]]
+
+          feature.geometry.coordinates = polygon
+        })
+      }
+
       if (this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON' ||
           this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON_NODE') {
 
