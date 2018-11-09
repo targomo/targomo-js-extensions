@@ -2,12 +2,6 @@
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions, SimpleLRU, RequestsUtil } from '@targomo/core';
 import { SimpleCache } from '../util/cache';
 
-
-interface TileRendered {
-  data: google.maps.Data,
-  tileData: any,
-}
-
 /**
  * use it like:
  * const styleOptions = (feature) => {
@@ -36,7 +30,7 @@ interface TileRendered {
 export class MultigraphOverlay implements google.maps.MapType {
   private options: any // MultigraphRequestOptions & {sources: LatLngIdTravelMode[]}
   private config: string;
-  private visibleTiles = new SimpleCache<TileRendered>()
+  private visibleTiles = new SimpleCache<google.maps.Data>()
   private requestCache = new SimpleLRU<any>(100)
 
   constructor(
@@ -56,12 +50,10 @@ export class MultigraphOverlay implements google.maps.MapType {
 
       // Remove shapes from map
       const currentTiles = this.visibleTiles
-      this.visibleTiles = new SimpleCache<TileRendered>()
+      this.visibleTiles = new SimpleCache<google.maps.Data>()
       const entries = await currentTiles.entries()
-      entries.forEach(entry => {
-        if (entry.data) {
-          entry.data.setMap(null)
-        }
+      entries.forEach(tile => {
+        tile.setMap(null)
       })
     });
   }
@@ -74,16 +66,11 @@ export class MultigraphOverlay implements google.maps.MapType {
 
   private async getAndRenderTile(coord: { x: number, y: number }, zoom: number) {
     const jsonData = await this.fetchTile(coord, zoom)
-    const tile: TileRendered = {
-      tileData: jsonData,
-      data: null,
-    }
+    const tile = new google.maps.Data({style: this.styleOptions})
 
-    const data = new google.maps.Data({style: this.styleOptions});
-    data.addGeoJson(jsonData);
-    tile.data = data
+    tile.addGeoJson(jsonData);
     setTimeout(() => {
-      data.setMap(this.map)
+      tile.setMap(this.map)
     })
 
     return tile
@@ -104,11 +91,9 @@ export class MultigraphOverlay implements google.maps.MapType {
         // Points are difficult to style in google maps so instead we are converting to single point polygons
         jsonData.features.forEach((feature: any) => {
           feature.geometry.type = 'POLYGON'
-          const polygon = [[
+          feature.geometry.coordinates = [[
             feature.geometry.coordinates, feature.geometry.coordinates, feature.geometry.coordinates
           ]]
-
-          feature.geometry.coordinates = polygon
         })
       } else if (this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON' ||
           this.options.multigraph.layer.type.toUpperCase() === 'HEXAGON_NODE') {
