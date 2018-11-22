@@ -7,12 +7,12 @@ export class TgmLeafletMultigraphTileLayer {
     map: L.Map;
     multigraphOptions: MultigraphRequestOptions;
     sources: LatLngIdTravelMode[];
-    vectorTileoptions: {vectorTileLayeStyles: any};
+    vectorTileoptions: {vectorTileLayerStyles: any};
     constructor(
         tgmClient: TargomoClient,
         sources: LatLngIdTravelMode[],
         multigraphOptions: MultigraphRequestOptions,
-        vectorTileoptions: {vectorTileLayeStyles: any}) {
+        vectorTileoptions: {vectorTileLayerStyles: any}) {
 
         this.tgmClient = tgmClient;
         this.sources = sources;
@@ -31,7 +31,7 @@ export class TgmLeafletMultigraphTileLayer {
         this.multigraphOptions = multigraphOptions;
         this.createLayer();
     }
-    updateVectorTileOptions(vectorTileoptions: {vectorTileLayeStyles: any}) {
+    updateVectorTileOptions(vectorTileoptions: {vectorTileLayerStyles: any}) {
         this.vectorTileoptions = vectorTileoptions;
         this.createLayer();
     }
