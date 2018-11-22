@@ -55,7 +55,7 @@
     "webpack-node-externals": "1.6.0"
   },
   "dependencies": {
-    "@targomo/core": "^0.2.1",
+    "@targomo/core": "0.2.2-dev6badc78deef5ce7fcf7a8336a28d17fcc5e63932",
     "@types/googlemaps": "^3.30.10",
     "@types/leaflet": "^1.2.8",
     "leaflet": "^1.3.1",

@@ -28,11 +28,10 @@ import { SimpleCache } from '../util/cache';
   this.map.overlayMapTypes.setAt(0, multigraphOverlay);
  */
 export class MultigraphOverlay implements google.maps.MapType {
-  private options: any // MultigraphRequestOptions & {sources: LatLngIdTravelMode[]}
-  private config: string;
+  private options: MultigraphRequestOptions
   private visibleTiles = new SimpleCache<google.maps.Data>()
   private requestCache = new SimpleLRU<any>(100)
-
+  private sources: LatLngIdTravelMode[];
   constructor(
     private map: google.maps.Map,
     public tileSize: google.maps.Size,
@@ -41,9 +40,8 @@ export class MultigraphOverlay implements google.maps.MapType {
     sources: LatLngIdTravelMode[],
     private styleOptions: google.maps.CircleOptions | google.maps.Data.StyleOptions) {
 
-    this.options = { ...multigraphOptions, sources: sources };
-    // Attatched to the requests as &cfg=
-    this.config = encodeURIComponent(JSON.stringify(this.options));
+    this.sources = sources;
+    this.options = multigraphOptions;
 
     // Remove everything from the map when you zoom, getTile will automatically be called to redraw the correct data
     this.map.addListener('zoom_changed', async () => {
@@ -78,14 +76,14 @@ export class MultigraphOverlay implements google.maps.MapType {
 
 
   private fetchTile(coord: { x: number, y: number }, zoom: number) {
-    const baseUrl = 'https://api.targomo.com/westcentraleurope/v1/multigraph/' // TODO get from client
-    const tileUrl = baseUrl + zoom + '/' + coord.x + '/' + coord.y + '.geojson' +
-                    '?key=' + encodeURIComponent(this.client.serviceKey) +
-                    '&cfg=' + this.config
+    let url = this.client.multigraph.getTiledMultigraphUrl(this.sources, this.options, 'geojson')
+    .replace('{z}', zoom + '')
+    .replace('{x}', coord.x + '')
+    .replace('{y}', coord.y + '');
 
-    return this.requestCache.get(tileUrl, async () => {
+    return this.requestCache.get(url, async () => {
       const requests = new RequestsUtil()
-      let jsonData = await requests.fetchData(tileUrl)
+      let jsonData = await requests.fetchData(url)
 
       if (this.options.multigraph.layer.type.toUpperCase() === 'NODE') {
         // Points are difficult to style in google maps so instead we are converting to single point polygons
