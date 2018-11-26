@@ -1,0 +1,88 @@
+image: code.route360.net:4567/docker/general-image/node8:0.0.2
+
+variables:
+  NODE_ENV: gitlab-ci
+
+before_script:
+  - npm config set loglevel warn
+  - npm install
+
+lint:
+  stage: lint
+  script:
+    - npm run lint
+
+test_and_coverage:
+  stage: test
+  script:
+    - npm run test:coverage
+    
+build_release:
+  stage: build
+  script:
+    - apt-get install --yes jq
+    - export VERSION=$(cat package.json | jq -r .version)
+    - export CURRENT_TAG=$(git tag -l --contains HEAD)
+    - |
+      if [ "$CURRENT_TAG" != "v$VERSION" ]; then
+        echo "Current tag $CURRENT_TAG does not match version $VERSION"
+        exit 1
+      fi
+    - npm run build
+    - cp LICENSE README.md dist/
+
+    - cd dist/googlemaps
+    - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+    - npm publish --access=public
+    - echo "email=developers@targomo.com" > .npmrc
+    - echo "@targomo:registry=https://repository.route360.net/repository/targomo/" >> .npmrc
+    - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - echo "always-auth=true" >> .npmrc
+    - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - npm publish --registry https://repository.route360.net/repository/targomo/
+
+    - cd ../leaflet
+    - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+    - npm publish --access=public
+    - echo "email=developers@targomo.com" > .npmrc
+    - echo "@targomo:registry=https://repository.route360.net/repository/targomo/" >> .npmrc
+    - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - echo "always-auth=true" >> .npmrc
+    - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - npm publish --registry https://repository.route360.net/repository/targomo/    
+  only:
+    - tags
+
+build_pre_release:
+  stage: build
+  script:
+    - npm run build
+    - export CURRENT_VERSION=$(git rev-parse HEAD --short)
+
+    - cd dist/googlemaps
+    - node -e "let p = require('./package.json'); p.version = p.version + '-dev$CURRENT_VERSION'; console.log(JSON.stringify(p))" > package.json.new
+    - mv package.json.new package.json
+    - echo "email=developers@targomo.com" > .npmrc
+    - echo "@targomo:registry=https://repository.route360.net/repository/targomo/" >> .npmrc
+    - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - echo "always-auth=true" >> .npmrc
+    - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - npm publish --registry https://repository.route360.net/repository/targomo/
+
+    - cd ../leaflet
+    - node -e "let p = require('./package.json'); p.version = p.version + '-dev$CURRENT_VERSION'; console.log(JSON.stringify(p))" > package.json.new
+    - mv package.json.new package.json
+    - echo "email=developers@targomo.com" > .npmrc
+    - echo "@targomo:registry=https://repository.route360.net/repository/targomo/" >> .npmrc
+    - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - echo "always-auth=true" >> .npmrc
+    - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
+    - npm publish --registry https://repository.route360.net/repository/targomo/    
+  when: manual
+  only: 
+    - branches
+
+stages:
+  - lint
+  - test
+  - build
