@@ -1,8 +1,8 @@
 {
   "name": "@targomo/js-extensions",
-  "description": "The JavaScript (& TypeScript) API for Targomo's time-based access mapping services.",
+  "description": "Google and Leaflet JavaScript (& TypeScript) extensions for Targomo's time-based access mapping services.",
   "author": "Targomo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "repository": "github:targomo/targomo-js-extensions",
   "homepage": "https://targomo.com/developers",
