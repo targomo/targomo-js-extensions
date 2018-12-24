@@ -41,12 +41,12 @@ export class PolygonRenderOptions extends PolygonRenderOptionsData {
 
     if (isPolygonRenderColorComplexOption(option)) {
       return {
-        color: option.color || '#ccc',
+        color: option.color ||  (this.inverse ? '#000' : '#ccc'),
         opacity: option.opacity || 1
       }
     } else {
       return {
-        color: option || '#ccc',
+        color: option ||  (this.inverse ? '#000' : '#ccc'),
         opacity: 1
       }
     }
