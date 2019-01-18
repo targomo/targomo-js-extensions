@@ -67,8 +67,10 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   }
 
   onRemove() {
-    // this.divElement.parentNode.removeChild(this.divElement)
-    // this.divElement = null
+    if (this.element) {
+      this.element.onRemove()
+      this.element = null
+    }
   }
 
   /**
@@ -77,7 +79,9 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    */
   setData(multipolygon: MultipolygonData[]) {
     this.readyPromise.then(() => {
-      this.element.setData(multipolygon)
+      if (this.element) {
+        this.element.setData(multipolygon)
+      }
     })
   }
 
