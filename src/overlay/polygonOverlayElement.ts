@@ -89,7 +89,11 @@ export class PolygonOverlayElement {
    * @param multipolygon
    */
   setData(multipolygon: MultipolygonData[]) {
-    this.model = new ProjectedMultiPolygon(multipolygon)
+    if (multipolygon) {
+      this.model = new ProjectedMultiPolygon(multipolygon)
+    } else {
+      this.model = null
+    }
     this.render()
   }
 
@@ -145,7 +149,12 @@ export class PolygonOverlayElement {
   private render() {
     // const inverse = this.options.inverse
 
-    if (!this.model || !this.divElement) {
+    if (!this.divElement) {
+      return
+    }
+
+    if (!this.model) {
+      this.divElement.innerHTML = ''
       return
     }
 
