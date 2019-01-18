@@ -67,8 +67,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   }
 
   onRemove() {
-    // this.divElement.parentNode.removeChild(this.divElement)
-    // this.divElement = null
+    this.element.onRemove()
   }
 
   /**
