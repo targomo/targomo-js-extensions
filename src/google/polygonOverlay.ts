@@ -61,7 +61,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     }, this.options)
 
     const panes = this.getPanes()
-    panes.overlayMouseTarget.appendChild(this.element.initElement())
+    panes.overlayLayer.appendChild(this.element.initElement())
 
     this.readyResolve()
   }
