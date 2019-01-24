@@ -1,4 +1,5 @@
 import * as L from 'leaflet';
+import '../../node_modules/leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js';
 
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions } from '@targomo/core';
 export class TgmLeafletMultigraphTileLayer {
@@ -27,30 +28,37 @@ export class TgmLeafletMultigraphTileLayer {
         this.layer.addTo(map);
     }
 
-    updateMultigraphOptions(multigraphOptions: MultigraphRequestOptions) {
-        this.multigraphOptions = multigraphOptions;
-        this.createLayer();
-    }
-    updateVectorTileOptions(vectorTileoptions: {vectorTileLayerStyles: any}) {
-        this.vectorTileoptions = vectorTileoptions;
-        this.createLayer();
-    }
-    updateSources(sources: LatLngIdTravelMode[]) {
-        this.sources = sources;
-        this.createLayer();
-    }
-
-    createLayer() {
-        if (this.map && this.layer) {
-            this.map.removeLayer(this.layer);
+    update(
+        multigraphOptions?: MultigraphRequestOptions,
+        vectorTileoptions?: {vectorTileLayerStyles: any},
+        sources?: LatLngIdTravelMode[]): Promise<any>  {
+        if (multigraphOptions) {
+            this.multigraphOptions = multigraphOptions;
+        }
+        if (vectorTileoptions) {
+            this.vectorTileoptions = vectorTileoptions;
+        }
+        if (sources) {
+            this.sources = sources;
         }
 
-        this.layer = (L as any).vectorGrid.protobuf(
-            this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt'),
-            this.vectorTileoptions);
+        return this.createLayer();
+    }
 
-        if (this.map && this.layer) {
-            this.layer.addTo(this.map);
-        }
+    createLayer(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (this.map && this.layer) {
+                this.map.removeLayer(this.layer);
+            }
+            this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt').then(url => {
+                this.layer = (L as any).vectorGrid.protobuf(
+                    url,
+                    this.vectorTileoptions);
+                if (this.map && this.layer) {
+                    this.layer.addTo(this.map);
+                }
+                resolve();
+            })
+        })
     }
 }
