@@ -34,7 +34,9 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    */
   setData(multipolygon: MultipolygonData[]) {
     this.readyPromise.then(() => {
-      this.element.setData(multipolygon)
+      if (this.element) {
+        this.element.setData(multipolygon)
+      }
     })
   }
 
@@ -115,6 +117,14 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
     this.readyResolve()
     this.draw()
 
+    return this
+  }
+
+  onRemove(): this {
+    if (this.element) {
+      this.element.onRemove()
+      this.element = null
+    }
     return this
   }
 

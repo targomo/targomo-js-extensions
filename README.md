@@ -1,2 +1,2 @@
-# targomo-js-googlemaps
-Google Maps extension for targomo-js
+# targomo-js-extensions
+Google Maps and Leaflet extensions for targomo-js
