@@ -16,14 +16,14 @@ export class TgmLeafletMultigraphTileLayer {
         vectorTileoptions: {vectorTileLayerStyles: any}) {
 
         this.tgmClient = tgmClient;
-        this.sources = sources;
-        this.multigraphOptions = multigraphOptions;
-        this.vectorTileoptions = vectorTileoptions;
 
-        this.createLayer();
+        this.update(multigraphOptions, vectorTileoptions, sources);
     }
 
-    addTo(map: L.Map) {
+    async addTo(map: L.Map) {
+        if (!this.layer) {
+            await this.createLayer();
+        }
         this.map = map;
         this.layer.addTo(map);
     }
