@@ -45,20 +45,15 @@ export class TgmLeafletMultigraphTileLayer {
         return this.createLayer();
     }
 
-    createLayer(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            if (this.map && this.layer) {
-                this.map.removeLayer(this.layer);
-            }
-            this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt').then(url => {
-                this.layer = (L as any).vectorGrid.protobuf(
-                    url,
-                    this.vectorTileoptions);
-                if (this.map && this.layer) {
-                    this.layer.addTo(this.map);
-                }
-                resolve();
-            })
-        })
+    async createLayer() {
+        if (this.map && this.layer) {
+            this.map.removeLayer(this.layer);
+        }
+        const url = await this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt');
+        this.layer = (L as any).vectorGrid.protobuf(url, this.vectorTileoptions);
+        if (this.map && this.layer) {
+            this.layer.addTo(this.map);
+        }
+        return;
     }
 }
