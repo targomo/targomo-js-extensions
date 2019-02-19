@@ -1,4 +1,5 @@
 import * as L from 'leaflet';
+import 'leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js';
 
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions } from '@targomo/core';
 export class TgmLeafletMultigraphTileLayer {
@@ -15,42 +16,44 @@ export class TgmLeafletMultigraphTileLayer {
         vectorTileoptions: {vectorTileLayerStyles: any}) {
 
         this.tgmClient = tgmClient;
-        this.sources = sources;
-        this.multigraphOptions = multigraphOptions;
-        this.vectorTileoptions = vectorTileoptions;
 
-        this.createLayer();
+        this.update(multigraphOptions, vectorTileoptions, sources);
     }
 
-    addTo(map: L.Map) {
+    async addTo(map: L.Map) {
+        if (!this.layer) {
+            await this.createLayer();
+        }
         this.map = map;
         this.layer.addTo(map);
     }
 
-    updateMultigraphOptions(multigraphOptions: MultigraphRequestOptions) {
-        this.multigraphOptions = multigraphOptions;
-        this.createLayer();
-    }
-    updateVectorTileOptions(vectorTileoptions: {vectorTileLayerStyles: any}) {
-        this.vectorTileoptions = vectorTileoptions;
-        this.createLayer();
-    }
-    updateSources(sources: LatLngIdTravelMode[]) {
-        this.sources = sources;
-        this.createLayer();
+    update(
+        multigraphOptions?: MultigraphRequestOptions,
+        vectorTileoptions?: {vectorTileLayerStyles: any},
+        sources?: LatLngIdTravelMode[]): Promise<any>  {
+        if (multigraphOptions) {
+            this.multigraphOptions = multigraphOptions;
+        }
+        if (vectorTileoptions) {
+            this.vectorTileoptions = vectorTileoptions;
+        }
+        if (sources) {
+            this.sources = sources;
+        }
+
+        return this.createLayer();
     }
 
-    createLayer() {
+    async createLayer() {
         if (this.map && this.layer) {
             this.map.removeLayer(this.layer);
         }
-
-        this.layer = (L as any).vectorGrid.protobuf(
-            this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt'),
-            this.vectorTileoptions);
-
+        const url = await this.tgmClient.multigraph.getTiledMultigraphUrl(this.sources, this.multigraphOptions, 'mvt');
+        this.layer = (L as any).vectorGrid.protobuf(url, this.vectorTileoptions);
         if (this.map && this.layer) {
             this.layer.addTo(this.map);
         }
+        return;
     }
 }
