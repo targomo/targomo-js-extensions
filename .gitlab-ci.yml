@@ -1,4 +1,4 @@
-image: code.route360.net:4567/docker/general-image/node8:0.0.3
+image: code.route360.net:4567/docker/general-image/node10:0.0.5
 
 variables:
   NODE_ENV: gitlab-ci
@@ -55,7 +55,6 @@ build_release:
     - npm publish --registry https://repository.route360.net/repository/targomo/
 
     - export ST_AUTH_VERSION=2.0
-    - apt-get install -y swift
     - cd ../releases
     - swift upload releases leaflet
     - swift upload releases googlemaps
@@ -89,11 +88,7 @@ build_pre_release:
     - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
     - npm publish --registry https://repository.route360.net/repository/targomo/
 
-    - echo debug
-    - echo $OS_REGION_NAME
-    - echo $OS_AUTH_URL
     - export ST_AUTH_VERSION=2.0
-    - apt-get install -y swift
     - cd ../releases
     - swift upload releases leaflet
     - swift upload releases googlemaps
