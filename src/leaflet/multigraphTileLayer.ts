@@ -1,5 +1,5 @@
 import * as L from 'leaflet';
-import '../../node_modules/leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js';
+import 'leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js';
 
 import { TargomoClient, LatLngIdTravelMode, MultigraphRequestOptions } from '@targomo/core';
 export class TgmLeafletMultigraphTileLayer {
