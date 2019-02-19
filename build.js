@@ -17,7 +17,7 @@ const description = require("./package.json").description || ''
 const name = require("./package.json").name || ''
 
 const deps = Object.keys(require("./package.json").dependencies).concat(Object.keys(require("./package.json").peerDependencies || {}))
-const builtinImports = []
+const builtinImports = ['leaflet.vectorgrid/dist/Leaflet.VectorGrid.bundled.js']
 const external = [...deps, ...builtinImports]
 const globals = {
   '@targomo/core': 'tgm',
@@ -27,7 +27,7 @@ const globals = {
 const production = !process.env.ROLLUP_WATCH;
 
 function getBanner() {
-  return `/** 
+  return `/**
 * ${name} ${curVersion} http://targomo.com
 * ${description}
 * (c) ${curYear} ${author}
@@ -37,12 +37,14 @@ function getBanner() {
 async function mergeFullVersion(source, withLib, destination) {
   source = paths.resolve(__dirname, source)
   destination = paths.resolve(__dirname, destination)
-  withLib = paths.resolve(__dirname, 'node_modules', '@targomo', 'core', withLib)
 
-  const libData = fs.readFileSync(withLib).toString('utf-8')
+  const libData = withLib.map(path => {
+    const fullPath = paths.resolve(__dirname, 'node_modules', path)
+    return fs.readFileSync(fullPath).toString('utf-8')
+  })
+
   const sourceData = fs.readFileSync(source).toString('utf-8')
-
-  fs.writeFileSync(destination, [libData, sourceData].join('\n\n\n'))
+  fs.writeFileSync(destination, libData.concat([sourceData]).join('\n\n\n'))
 }
 
 
@@ -70,7 +72,7 @@ function mergePackage(which, destination) {
   fs.writeFileSync(paths.join(__dirname, destination), JSON.stringify(merged))
 }
 
-async function buildTarget(which) {
+async function buildTarget(which, bundleLibs) {
   const indexFile = `./src/index.${which}.ts`
   const targetFile = `targomo-${which}`
   const targetVariable = `tgm.${which}`
@@ -89,7 +91,7 @@ async function buildTarget(which) {
     resolve(),
     commonjs()
   ]
-  
+
   // --- BROWSER ---
 
   // Regular bundle
@@ -109,7 +111,9 @@ async function buildTarget(which) {
     file: distFolder +  targetFile + '.umd.js'
   })
 
-  mergeFullVersion(distFolder + targetFile + '.umd.js', 'targomo-core.umd.js', distFolder + targetFile + '-full.umd.js')
+  mergeFullVersion(distFolder + targetFile + '.umd.js',
+                  bundleLibs.concat([paths.join('@targomo', 'core', 'targomo-core.umd.js')]),
+                  distFolder + targetFile + '-full.umd.js')
 
   let bannercomment0 = false;
 
@@ -151,9 +155,11 @@ async function buildTarget(which) {
     file: distFolder + targetFile + '.umd.min.js',
   })
 
-  mergeFullVersion(distFolder + targetFile + '.umd.min.js', 'targomo-core.umd.min.js', distFolder + targetFile + '-full.umd.min.js')
+  mergeFullVersion(distFolder + targetFile + '.umd.min.js',
+                   bundleLibs.concat([paths.join('@targomo', 'core', 'targomo-core.umd.min.js')]),
+                   distFolder + targetFile + '-full.umd.min.js')
 
-  mergePackage(which, distFolder + `package.json`)  
+  mergePackage(which, distFolder + `package.json`)
 
 
   const releaseFolder = paths.resolve(__dirname, 'dist', 'releases', 'javascript', targetFile)
@@ -169,5 +175,5 @@ async function buildTarget(which) {
 }
 
 
-buildTarget('googlemaps')
-buildTarget('leaflet')
+buildTarget('googlemaps', [])
+buildTarget('leaflet', [paths.join('leaflet.vectorgrid', 'dist', 'Leaflet.VectorGrid.bundled.js')])
