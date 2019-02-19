@@ -75,6 +75,7 @@ function mergePackage(which, destination) {
 async function buildTarget(which, bundleLibs) {
   const indexFile = `./src/index.${which}.ts`
   const targetFile = `targomo-${which}`
+  const targetReleaseFolder = `${which}`
   const targetVariable = `tgm.${which}`
   const distFolder = `./dist/${which}/`
 
@@ -162,7 +163,7 @@ async function buildTarget(which, bundleLibs) {
   mergePackage(which, distFolder + `package.json`)
 
 
-  const releaseFolder = paths.resolve(__dirname, 'dist', 'releases', 'javascript', targetFile)
+  const releaseFolder = paths.resolve(__dirname, 'dist', 'releases', targetReleaseFolder)
   fsExtra.ensureDirSync(releaseFolder)
 
   const postfixes = [['', ''], ['', '.min'], ['-full', ''], ['-full', '.min']]

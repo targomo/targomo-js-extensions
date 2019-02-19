@@ -16,7 +16,7 @@ test_and_coverage:
   stage: test
   script:
     - npm run test:coverage
-    
+
 build_release:
   stage: build
   script:
@@ -52,7 +52,14 @@ build_release:
     - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
     - echo "always-auth=true" >> .npmrc
     - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
-    - npm publish --registry https://repository.route360.net/repository/targomo/    
+    - npm publish --registry https://repository.route360.net/repository/targomo/
+
+    - export ST_AUTH_VERSION=2.0
+    - apt-get install -y swift
+    - cd ../releases
+    - swift upload releases leaflet
+    - swift upload releases googlemaps
+
   only:
     - tags
 
@@ -80,9 +87,16 @@ build_pre_release:
     - echo "//repository.route360.net/repository/targomo/:_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
     - echo "always-auth=true" >> .npmrc
     - echo "_auth=$NEXUS_REPOSITORY_AUTH_KEY" >> .npmrc
-    - npm publish --registry https://repository.route360.net/repository/targomo/    
+    - npm publish --registry https://repository.route360.net/repository/targomo/
+
+    - export ST_AUTH_VERSION=2.0
+    - apt-get install -y swift
+    - cd ../releases
+    - swift upload releases leaflet
+    - swift upload releases googlemaps
+
   when: manual
-  only: 
+  only:
     - branches
 
 stages:
