@@ -132,8 +132,8 @@ export function render(viewport: ProjectedBounds,
     }
   })
 
-  let width = xMaxLeaflet - xMinLeaflet
-  let height = yMaxLeaflet - yMinLeaflet
+  let width = Math.abs(xMaxLeaflet - xMinLeaflet)
+  let height = Math.abs(yMaxLeaflet - yMinLeaflet)
 
   if (options.inverse) {
     return renderInverseElement(children, width, height)
