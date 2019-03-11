@@ -2,7 +2,7 @@ export class MinMaxSchedule {
   private shortTimeout: any
   private longTimeout: any
 
-  constructor(private min: number = 50, private max: number = 500) {
+  constructor(private min: number = 200, private max: number = 700) {
   }
 
   schedule(callback: () => any) {
