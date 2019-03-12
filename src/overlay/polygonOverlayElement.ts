@@ -19,7 +19,10 @@ export class PolygonOverlayElement {
   private divElement: HTMLDivElement
   bounds: BoundingBox
   private model: ProjectedMultiPolygon
-  private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
+  private renderTimeout: MinMaxSchedule = new MinMaxSchedule(300, 3000)
+
+  private currentLeft = 0
+  private currentTop = 0
 
   /**
    *
@@ -37,12 +40,26 @@ export class PolygonOverlayElement {
    *
    */
   draw(immediately: boolean = false) {
-    this.resize()
-
     if (immediately) {
+      this.resize()
       this.render()
+      this.divElement.style.transform = null
     } else {
-      this.renderTimeout.schedule(() => this.render())
+      if (this.divElement && this.bounds) {
+
+        const bounds = this.plugin.getElementPixels(this.bounds)
+        const sw = bounds.southWest
+        const ne = bounds.northEast
+
+        const div = this.divElement
+        div.style.transform = `translate3d(${sw.x - this.currentLeft}px, ${ne.y - this.currentTop}px, 0)`
+      }
+
+      this.renderTimeout.scheduleMaximum(() => {
+        console.log('sschediled')
+        this.render()
+        this.divElement.style.transform = null
+      })
     }
   }
 
@@ -56,6 +73,8 @@ export class PolygonOverlayElement {
     const ne = bounds.northEast
 
     const div = this.divElement
+    this.currentLeft = sw.x
+    this.currentTop = ne.y
     div.style.left = sw.x + 'px'
     div.style.top = ne.y + 'px'
     div.style.width = (ne.x - sw.x) + 'px'

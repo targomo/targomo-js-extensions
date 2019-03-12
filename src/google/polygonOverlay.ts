@@ -19,6 +19,8 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
   private options: GoogleMapsPolygonOverlayOptions
 
+  private idleListener: google.maps.MapsEventListener
+
   /**
    *
    * @param map
@@ -63,13 +65,23 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
     const panes = this.getPanes()
     panes.overlayLayer.appendChild(this.element.initElement())
 
+
+    this.idleListener = google.maps.event.addListener(map, 'idle', () => {
+      console.log('IDLE')
+      this.element.draw(true)
+    })
     this.readyResolve()
   }
+
 
   onRemove() {
     if (this.element) {
       this.element.onRemove()
       this.element = null
+    }
+
+    if (this.idleListener) {
+      google.maps.event.removeListener(this.idleListener)
     }
   }
 

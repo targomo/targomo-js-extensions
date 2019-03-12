@@ -23,4 +23,20 @@ export class MinMaxSchedule {
     clearTimeout(this.shortTimeout)
     this.shortTimeout = setTimeout(action, this.min)
   }
+
+  scheduleMaximum(callback: () => any) {
+    const action = () => {
+      clearTimeout(this.longTimeout)
+
+      this.longTimeout = null
+
+      callback()
+    }
+
+    if (!this.longTimeout) {
+      this.longTimeout = setTimeout(action, this.max)
+    }
+
+    clearTimeout(this.shortTimeout)
+  }
 }
