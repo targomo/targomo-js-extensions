@@ -44,18 +44,23 @@ export class PolygonOverlayElement {
       this.render()
       this.divElement.style.transform = null
     } else {
-      // this.resize()
       if (this.divElement && this.bounds) {
-
         const bounds = new ProjectedBounds(this.plugin.getElementPixels(this.bounds))
 
         const div = this.divElement
-        const dx = bounds.left() - this.currentPixelBounds.left()
-        const dy = bounds.top() - this.currentPixelBounds.top()
+        const dx = Math.round(bounds.left() - this.currentPixelBounds.left())
+        const dy = Math.round(bounds.top() - this.currentPixelBounds.top())
 
-        if (dx !== 0 || dy !== 0) {
+        const scaleX = bounds.width() / this.currentPixelBounds.width()
+        const scaleY = bounds.height() / this.currentPixelBounds.height()
+
+        if (scaleY !== 1 || scaleX !== 1) {
+          // console.log('scalex', scaleX, scaleY)
+          // div.style.transform = `scale3d(${scaleX}, ${scaleY}, 1) translate3d(${dx}px, ${dy}px, 0)`
+          this.resize()
+          // console.log('TRANSFORM', div.style.transform)
+        } else if (dx !== 0 || dy !== 0) {
           div.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
-          console.log('TRANSFORM', div.style.transform)
         }
       }
 
@@ -85,6 +90,7 @@ export class PolygonOverlayElement {
     div.style.top = bounds.top() + 'px'
     div.style.width = bounds.width() + 'px'
     div.style.height = bounds.height() + 'px'
+    div.style.transform = null
   }
 
   /**
@@ -99,6 +105,8 @@ export class PolygonOverlayElement {
 
     ; (<any>div).style['backface-visibility'] = 'hidden'
     ; (<any>div).style['perspective'] = 1000
+    ; (<any>div).style['transform-origin'] = 'center'
+    ; (<any>div).style['will-change-origin'] = 'transform'
 
     this.divElement = div
     return this.divElement
