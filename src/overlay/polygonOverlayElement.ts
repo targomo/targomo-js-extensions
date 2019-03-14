@@ -21,8 +21,7 @@ export class PolygonOverlayElement {
   private model: ProjectedMultiPolygon
   private renderTimeout: MinMaxSchedule = new MinMaxSchedule(300, 3000)
 
-  private currentLeft = 0
-  private currentTop = 0
+  private currentPixelBounds: ProjectedBounds
 
   /**
    *
@@ -45,16 +44,20 @@ export class PolygonOverlayElement {
       this.render()
       this.divElement.style.transform = null
     } else {
-      this.resize()
-      // if (this.divElement && this.bounds) {
+      // this.resize()
+      if (this.divElement && this.bounds) {
 
-      //   const bounds = this.plugin.getElementPixels(this.bounds)
-      //   const sw = bounds.southWest
-      //   const ne = bounds.northEast
+        const bounds = new ProjectedBounds(this.plugin.getElementPixels(this.bounds))
 
-      //   const div = this.divElement
-      //   div.style.transform = `translate3d(${sw.x - this.currentLeft}px, ${ne.y - this.currentTop}px, 0)`
-      // }
+        const div = this.divElement
+        const dx = bounds.left() - this.currentPixelBounds.left()
+        const dy = bounds.top() - this.currentPixelBounds.top()
+
+        if (dx !== 0 || dy !== 0) {
+          div.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
+          console.log('TRANSFORM', div.style.transform)
+        }
+      }
 
       this.renderTimeout.scheduleMaximum(() => {
         this.render()
@@ -68,17 +71,20 @@ export class PolygonOverlayElement {
       return
     }
 
-    const bounds = this.plugin.getElementPixels(this.bounds)
-    const sw = bounds.southWest
-    const ne = bounds.northEast
+    const bounds = this.currentPixelBounds = new ProjectedBounds(this.plugin.getElementPixels(this.bounds))
+    // const sw = bounds.southWest
+    // const ne = bounds.northEast
 
     const div = this.divElement
-    this.currentLeft = sw.x
-    this.currentTop = ne.y
-    div.style.left = sw.x + 'px'
-    div.style.top = ne.y + 'px'
-    div.style.width = (ne.x - sw.x) + 'px'
-    div.style.height = (sw.y - ne.y) + 'px'
+    // div.style.left = sw.x + 'px'
+    // div.style.top = ne.y + 'px'
+    // div.style.width = (ne.x - sw.x) + 'px'
+    // div.style.height = (sw.y - ne.y) + 'px'
+
+    div.style.left = bounds.left() + 'px'
+    div.style.top = bounds.top() + 'px'
+    div.style.width = bounds.width() + 'px'
+    div.style.height = bounds.height() + 'px'
   }
 
   /**
@@ -168,7 +174,7 @@ export class PolygonOverlayElement {
     return {bounds, newBounds}
   }
 
-  private render() {
+  private render(resize = true) {
     // const inverse = this.options.inverse
 
     if (!this.divElement) {
@@ -187,14 +193,39 @@ export class PolygonOverlayElement {
     const growFactor = 0.1 // Math.min(5, Math.max(2, (zoom - 12) / 2))
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
-    const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
+    const {content, width, height} = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
+    // const image = new Image(width, height)
+    // image.src = `data:image/svg+xml;base64,${btoa(content)}`
 
-    this.divElement.innerHTML = result
+    // requestAnimationFrame(() => {
+    //   if (resize) {
+    //     this.divElement.innerHTML = `<canvas width="${width}" height="${height}"></canvas>`
+    //     console.log('new canvas')
+    //   }
+
+    //   const context = this.divElement.querySelector('canvas').getContext('2d')
+    //   context.drawImage(image, 0, 0)
+    // })
+
+      // this.divElement.innerHTML = content
+      // image.style.width = '100%'
+      // image.style.height = '100%'
+      // image.id = 'banana'
+      // this.divElement.innerHTML = ''
+      // this.divElement.appendChild(image)
+    // })
+    // console.log('paint2')
+    this.divElement.innerHTML = content
+
+    // requestAnimationFrame(() => this.divElement.innerHTML = result)
 
     const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
     const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
 
     this.bounds = {southWest, northEast}
-    this.resize()
+
+    if (resize) {
+      this.resize()
+    }
   }
 }

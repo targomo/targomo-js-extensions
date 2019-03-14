@@ -109,6 +109,23 @@ export class ProjectedBounds implements ProjectedBoundsData {
       southWest: project(this.southWest.x, this.southWest.y),
     })
   }
+
+  width() {
+    return this.northEast.x - this.southWest.x
+  }
+
+
+  height() {
+    return this.southWest.y - this.northEast.y
+  }
+
+  left() {
+    return this.southWest.x
+  }
+
+  top() {
+    return this.northEast.y
+  }
 }
 
 export interface ProjectedPointData {
