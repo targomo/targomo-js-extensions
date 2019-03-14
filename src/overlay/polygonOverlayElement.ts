@@ -45,18 +45,18 @@ export class PolygonOverlayElement {
       this.render()
       this.divElement.style.transform = null
     } else {
-      if (this.divElement && this.bounds) {
+      this.resize()
+      // if (this.divElement && this.bounds) {
 
-        const bounds = this.plugin.getElementPixels(this.bounds)
-        const sw = bounds.southWest
-        const ne = bounds.northEast
+      //   const bounds = this.plugin.getElementPixels(this.bounds)
+      //   const sw = bounds.southWest
+      //   const ne = bounds.northEast
 
-        const div = this.divElement
-        div.style.transform = `translate3d(${sw.x - this.currentLeft}px, ${ne.y - this.currentTop}px, 0)`
-      }
+      //   const div = this.divElement
+      //   div.style.transform = `translate3d(${sw.x - this.currentLeft}px, ${ne.y - this.currentTop}px, 0)`
+      // }
 
       this.renderTimeout.scheduleMaximum(() => {
-        console.log('sschediled')
         this.render()
         this.divElement.style.transform = null
       })
@@ -90,6 +90,9 @@ export class PolygonOverlayElement {
     div.style.borderWidth = '0px'
     div.style.position = 'absolute'
     div.style.opacity = ('' + this.options.opacity) || '0.5'
+
+    ; (<any>div).style['backface-visibility'] = 'hidden'
+    ; (<any>div).style['perspective'] = 1000
 
     this.divElement = div
     return this.divElement
@@ -181,7 +184,7 @@ export class PolygonOverlayElement {
     let zoomFactor = Math.pow(2, zoom) * 256
     zoomFactor = Math.min(10000000, zoomFactor)
 
-    const growFactor = Math.min(5, Math.max(2, (zoom - 12) / 2))
+    const growFactor = 0.1 // Math.min(5, Math.max(2, (zoom - 12) / 2))
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
     const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
