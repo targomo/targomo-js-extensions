@@ -175,8 +175,6 @@ export class PolygonOverlayElement {
   }
 
   private render(resize = true) {
-    // const inverse = this.options.inverse
-
     if (!this.divElement) {
       return
     }
@@ -190,34 +188,12 @@ export class PolygonOverlayElement {
     let zoomFactor = Math.pow(2, zoom) * 256
     zoomFactor = Math.min(10000000, zoomFactor)
 
-    const growFactor = 0.1 // Math.min(5, Math.max(2, (zoom - 12) / 2))
+    const growFactor = 0.1
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
-    const {content, width, height} = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
-    // const image = new Image(width, height)
-    // image.src = `data:image/svg+xml;base64,${btoa(content)}`
+    const {content} = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
 
-    // requestAnimationFrame(() => {
-    //   if (resize) {
-    //     this.divElement.innerHTML = `<canvas width="${width}" height="${height}"></canvas>`
-    //     console.log('new canvas')
-    //   }
-
-    //   const context = this.divElement.querySelector('canvas').getContext('2d')
-    //   context.drawImage(image, 0, 0)
-    // })
-
-      // this.divElement.innerHTML = content
-      // image.style.width = '100%'
-      // image.style.height = '100%'
-      // image.id = 'banana'
-      // this.divElement.innerHTML = ''
-      // this.divElement.appendChild(image)
-    // })
-    // console.log('paint2')
     this.divElement.innerHTML = content
-
-    // requestAnimationFrame(() => this.divElement.innerHTML = result)
 
     const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
     const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
