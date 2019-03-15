@@ -67,7 +67,6 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
 
 
     this.idleListener = google.maps.event.addListener(map, 'idle', () => {
-      console.log('IDLE')
       this.element.draw(true)
     })
     this.readyResolve()
