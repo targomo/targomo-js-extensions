@@ -66,7 +66,7 @@ export function render(viewport: ProjectedBounds,
                        zoomFactor: number,
                        multipolygons: ProjectedMultiPolygon,
                        options: PolygonRenderOptions
-                      ): string {
+                      ) {
   const pairMin = geometry.webMercatorToLeaflet(bounds3857.southWest.x, bounds3857.southWest.y, zoomFactor)
   const pairMax = geometry.webMercatorToLeaflet(bounds3857.northEast.x, bounds3857.northEast.y, zoomFactor)
 
@@ -132,12 +132,15 @@ export function render(viewport: ProjectedBounds,
     }
   })
 
-  let width = Math.abs(xMaxLeaflet - xMinLeaflet)
-  let height = Math.abs(yMaxLeaflet - yMinLeaflet)
+  let width = Math.ceil(Math.abs(xMaxLeaflet - xMinLeaflet))
+  let height = Math.ceil(Math.abs(yMaxLeaflet - yMinLeaflet))
 
+  let content: string
   if (options.inverse) {
-    return renderInverseElement(children, width, height)
+    content = renderInverseElement(children, width, height)
   } else {
-    return renderElement(children, width, height)
+    content = renderElement(children, width, height)
   }
+
+  return {content, width, height}
 }

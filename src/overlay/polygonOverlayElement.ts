@@ -19,7 +19,9 @@ export class PolygonOverlayElement {
   private divElement: HTMLDivElement
   bounds: BoundingBox
   private model: ProjectedMultiPolygon
-  private renderTimeout: MinMaxSchedule = new MinMaxSchedule()
+  private renderTimeout: MinMaxSchedule = new MinMaxSchedule(300, 3000)
+
+  private currentPixelBounds: ProjectedBounds
 
   /**
    *
@@ -37,12 +39,32 @@ export class PolygonOverlayElement {
    *
    */
   draw(immediately: boolean = false) {
-    this.resize()
-
     if (immediately) {
+      this.resize()
       this.render()
+      this.divElement.style.transform = null
     } else {
-      this.renderTimeout.schedule(() => this.render())
+      if (this.divElement && this.bounds) {
+        const bounds = new ProjectedBounds(this.plugin.getElementPixels(this.bounds))
+
+        const div = this.divElement
+        const dx = Math.round(bounds.left() - this.currentPixelBounds.left())
+        const dy = Math.round(bounds.top() - this.currentPixelBounds.top())
+
+        const scaleX = bounds.width() / this.currentPixelBounds.width()
+        const scaleY = bounds.height() / this.currentPixelBounds.height()
+
+        if (scaleY !== 1 || scaleX !== 1) {
+          div.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale3d(${scaleX}, ${scaleY}, 1)`
+        } else if (dx !== 0 || dy !== 0) {
+          div.style.transform = `translate3d(${dx}px, ${dy}px, 0)`
+        }
+      }
+
+      this.renderTimeout.scheduleMaximum(() => {
+        this.render()
+        this.divElement.style.transform = null
+      })
     }
   }
 
@@ -51,15 +73,15 @@ export class PolygonOverlayElement {
       return
     }
 
-    const bounds = this.plugin.getElementPixels(this.bounds)
-    const sw = bounds.southWest
-    const ne = bounds.northEast
+    const bounds = this.currentPixelBounds = new ProjectedBounds(this.plugin.getElementPixels(this.bounds))
 
     const div = this.divElement
-    div.style.left = sw.x + 'px'
-    div.style.top = ne.y + 'px'
-    div.style.width = (ne.x - sw.x) + 'px'
-    div.style.height = (sw.y - ne.y) + 'px'
+
+    div.style.left = bounds.left() + 'px'
+    div.style.top = bounds.top() + 'px'
+    div.style.width = bounds.width() + 'px'
+    div.style.height = bounds.height() + 'px'
+    div.style.transform = null
   }
 
   /**
@@ -72,7 +94,13 @@ export class PolygonOverlayElement {
     div.style.position = 'absolute'
     div.style.opacity = ('' + this.options.opacity) || '0.5'
 
+    ; (<any>div).style['backface-visibility'] = 'hidden'
+    ; (<any>div).style['perspective'] = 1000
+    ; (<any>div).style['transform-origin'] = '0 0 0'
+    ; (<any>div).style['will-change'] = 'transform'
+
     this.divElement = div
+
     return this.divElement
   }
 
@@ -146,9 +174,7 @@ export class PolygonOverlayElement {
     return {bounds, newBounds}
   }
 
-  private render() {
-    // const inverse = this.options.inverse
-
+  private render(resize = true) {
     if (!this.divElement) {
       return
     }
@@ -162,17 +188,20 @@ export class PolygonOverlayElement {
     let zoomFactor = Math.pow(2, zoom) * 256
     zoomFactor = Math.min(10000000, zoomFactor)
 
-    const growFactor = Math.min(5, Math.max(2, (zoom - 12) / 2))
+    const growFactor = 0.1
     const {bounds, newBounds} = this.boundsCalculation(growFactor)
 
-    const result = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
+    const {content} = svg.render(bounds, newBounds, zoomFactor, this.model, new PolygonRenderOptions(this.options))
 
-    this.divElement.innerHTML = result
+    this.divElement.innerHTML = content
 
     const southWest = geometry.webMercatorToLatLng(newBounds.southWest, undefined)
     const northEast = geometry.webMercatorToLatLng(newBounds.northEast, undefined)
 
     this.bounds = {southWest, northEast}
-    this.resize()
+
+    if (resize) {
+      this.resize()
+    }
   }
 }
