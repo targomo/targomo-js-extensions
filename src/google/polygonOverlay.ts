@@ -18,7 +18,7 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
   private options: GoogleMapsPolygonOverlayOptions
-
+  bounds: google.maps.LatLngBounds
   private idleListener: google.maps.MapsEventListener
 
   /**
@@ -88,12 +88,13 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    *
    * @param multipolygon
    */
-  setData(multipolygon: MultipolygonData[]) {
-    this.readyPromise.then(() => {
-      if (this.element) {
-        this.element.setData(multipolygon)
-      }
-    })
+  async setData(multipolygon: MultipolygonData[]) {
+    await this.readyPromise
+    if (this.element) {
+      this.element.setData(multipolygon)
+      const bounds = this.element.getBounds()
+      this.bounds = new google.maps.LatLngBounds(bounds.southWest, bounds.northEast)
+    }
   }
 
   /**

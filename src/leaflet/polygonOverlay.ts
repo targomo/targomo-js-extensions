@@ -17,6 +17,7 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
   private readyResolve: () => void
   private readyPromise = new Promise(resolve => this.readyResolve = resolve)
   private options: LeafletPolygonOverlayOptions
+  bounds: L.LatLngBounds
 
   /**
    *
@@ -32,12 +33,13 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    *
    * @param multipolygon
    */
-  setData(multipolygon: MultipolygonData[]) {
-    this.readyPromise.then(() => {
-      if (this.element) {
-        this.element.setData(multipolygon)
-      }
-    })
+  async setData(multipolygon: MultipolygonData[]) {
+    await this.readyPromise
+    if (this.element) {
+      this.element.setData(multipolygon)
+      const bounds = this.element.getBounds()
+      this.bounds = L.latLngBounds(bounds.northEast, bounds.southWest)
+    }
   }
 
   /**

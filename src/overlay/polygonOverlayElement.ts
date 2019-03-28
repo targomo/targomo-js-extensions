@@ -174,6 +174,14 @@ export class PolygonOverlayElement {
     return {bounds, newBounds}
   }
 
+  getBounds(): BoundingBox {
+    const projectedMultiPolygon = this.model
+    const bounds = projectedMultiPolygon.bounds3857
+    const southWest = geometry.webMercatorToLatLng(bounds.southWest, undefined)
+    const northEast = geometry.webMercatorToLatLng(bounds.northEast, undefined)
+    return { southWest, northEast }
+  }
+
   private render(resize = true) {
     if (!this.divElement) {
       return
