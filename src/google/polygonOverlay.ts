@@ -88,12 +88,11 @@ export class TgmGoogleMapsPolygonOverlay extends google.maps.OverlayView {
    *
    * @param multipolygon
    */
-  setData(multipolygon: MultipolygonData[]) {
-    this.readyPromise.then(() => {
-      if (this.element) {
-        this.element.setData(multipolygon)
-      }
-    })
+  async setData(multipolygon: MultipolygonData[]) {
+    await this.readyPromise
+    if (this.element) {
+      this.element.setData(multipolygon)
+    }
   }
 
   /**

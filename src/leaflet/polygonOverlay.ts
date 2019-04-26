@@ -32,12 +32,11 @@ export class TgmLeafletPolygonOverlay extends L.Layer {
    *
    * @param multipolygon
    */
-  setData(multipolygon: MultipolygonData[]) {
-    this.readyPromise.then(() => {
-      if (this.element) {
-        this.element.setData(multipolygon)
-      }
-    })
+  async setData(multipolygon: MultipolygonData[]) {
+    await this.readyPromise
+    if (this.element) {
+      this.element.setData(multipolygon)
+    }
   }
 
   /**

@@ -3,9 +3,18 @@ Leaflet extensions for targomo-js
 
 The Targomo Leaflet extensions Typescript library provides extensions for visualising results obtained from the Targomo services. The project is maintained by [Targomo](https://www.targomo.com/). The lib can also be used in non-typescript environments.
 
+## Standard Polygons
+![Leaflet Polygons](leaflet-polygons.png "Leaflet Polygons")
+## Inverse Polygons
+![Leaflet Inverse Polygons](leaflet-inverse.png "Leaflet Inverse Polygons")
+
 # API Key
 
 [Get your free API key by signing up for a Targomo account](https://account.targomo.com/signup?plan=free)
+
+# Regions
+
+The Targomo API is available in many regions. For all available endpoints, see our [availability map](http://targomo.com/developers/availability)
 
 # Getting started
 
@@ -31,4 +40,6 @@ Example usage for polygon layer
 
 # Docs
 
-More Documentation is available at [https://targomo.com/developers/guide/](https://targomo.com/developers/guide/), although this still contains the documentation for the r360-js lib, until the docs are finished for this lib.
+More detailed overviews of Targomo's services, along with code examples and demos is available at [https://targomo.com/developers/languages/javascript/](https://targomo.com/developers/languages/javascript/).
+
+Reference docs available [here](https://app.targomo.com/tsdocs/).
