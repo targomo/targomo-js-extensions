@@ -2,7 +2,7 @@
   "name": "@targomo/js-extensions",
   "description": "Google and Leaflet JavaScript (& TypeScript) extensions for Targomo's time-based access mapping services.",
   "author": "Targomo",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "license": "MIT",
   "repository": "github:targomo/targomo-js-extensions",
   "homepage": "https://targomo.com/developers",
