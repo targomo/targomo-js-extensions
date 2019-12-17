@@ -11,7 +11,7 @@ The Targomo Typescript API is a modern, open-source, isomorphic TypeScript libra
 
 # Regions
 
-The Targomo API is available in many regions. For all available endpoints, see our [availability map](http://targomo.com/developers/availability)
+The Targomo API is available in many regions. For all available endpoints, see our [availability map](https://targomo.com/developers/resources/coverage/)
 
 # Available extensions
 
