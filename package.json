@@ -28,8 +28,8 @@
     "commute",
     "commute-time"
   ],
-  "main": "targomo-googlemaps.js",
-  "module": "targomo-googlemaps.js",
+  "main": "targomo-googlemaps.umd.js",
+  "module": "targomo-googlemaps.umd.js",
   "browser": "targomo-googlemaps.umd.min.js",
   "typings": "./typings/index.d.ts",
   "scripts": {

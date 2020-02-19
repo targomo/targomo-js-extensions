@@ -1,10 +1,10 @@
 {
   "name": "@targomo/leaflet",
   "description": "Leaflet maps extensions for Targomo's time-based access mapping services.",
-  "main": "targomo-leaflet.js",
-  "module": "targomo-leaflet.js",
+  "main": "targomo-leaflet.umd.min.js",
+  "module": "targomo-leaflet.umd.min.js",
   "browser": "targomo-leaflet.umd.min.js",
-  "typings": "./typings/index.d.ts",
+  "typings": "./typings/index.leaflet.d.ts",
   "dependencies": {
     "@targomo/core": "^0.2.3",
     "@types/leaflet": "^1.2.8",

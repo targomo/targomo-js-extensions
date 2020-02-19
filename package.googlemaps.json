@@ -1,10 +1,10 @@
 {
   "name": "@targomo/googlemaps",
   "description": "Google maps extensions for for Targomo's time-based access mapping services.",
-  "main": "targomo-googlemaps.js",
-  "module": "targomo-googlemaps.js",
+  "main": "targomo-googlemaps.umd.min.js",
+  "module": "targomo-googlemaps.umd.min.js",
   "browser": "targomo-googlemaps.umd.min.js",
-  "typings": "./typings/index.d.ts",
+  "typings": "./typings/index.googlemaps.d.ts",
   "dependencies": {
     "@targomo/core": "^0.2.3",
     "@types/googlemaps": "^3.30.10"
