@@ -40,6 +40,6 @@ Example usage for polygon layer
 
 # Docs
 
-More detailed overviews of Targomo's services, along with code examples and demos is available at [https://targomo.com/developers/libraries/javascript/](https://targomo.com/developers/libraries/javascript/).
+More detailed overviews of Targomo's services, along with code examples and demos is available at [https://targomo.com/developers/libraries/javascript/](https://targomo.com/developers/documentation/javascript/).
 
 Reference docs available [here](https://app.targomo.com/tsdocs/).
