@@ -6,7 +6,7 @@
   "browser": "targomo-leaflet.umd.min.js",
   "typings": "./typings/index.leaflet.d.ts",
   "dependencies": {
-    "@targomo/core": "^0.2.3",
+    "@targomo/core": "^0.5.2",
     "@types/leaflet": "^1.2.8",
     "leaflet": "^1.3.1"
   }

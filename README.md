@@ -7,7 +7,7 @@ The Targomo Typescript API is a modern, open-source, isomorphic TypeScript libra
 
 # API Key
 
-[Get your free API key by signing up for a Targomo account](https://account.targomo.com/signup?plan=free)
+[Get your free API key by signing up for a Targomo account](https://www.targomo.com/developers/pricing/)
 
 # Regions
 

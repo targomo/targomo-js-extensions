@@ -1,7 +1,7 @@
 # targomo-js-leaflet
 Leaflet extensions for targomo-js
 
-The Targomo Leaflet extensions Typescript library provides extensions for visualising results obtained from the Targomo services. The project is maintained by [Targomo](https://www.targomo.com/). The lib can also be used in non-typescript environments.
+The Targomo Leaflet extensions Typescript library provides extensions for visualizing results obtained from the Targomo services. The project is maintained by [Targomo](https://www.targomo.com/). The lib can also be used in non-typescript environments.
 
 ## Standard Polygons
 ![Leaflet Polygons](leaflet-polygons.png "Leaflet Polygons")
@@ -10,7 +10,7 @@ The Targomo Leaflet extensions Typescript library provides extensions for visual
 
 # API Key
 
-[Get your free API key by signing up for a Targomo account](https://account.targomo.com/signup?plan=free)
+[Get your free API key by signing up for a Targomo account](https://www.targomo.com/developers/pricing/)
 
 # Regions
 
@@ -40,6 +40,6 @@ Example usage for polygon layer
 
 # Docs
 
-More detailed overviews of Targomo's services, along with code examples and demos is available at [https://targomo.com/developers/libraries/javascript/](https://targomo.com/developers/documentation/javascript/).
+More detailed overviews of Targomo's services, along with code examples and demos is available at [https://www.targomo.com/developers/documentation/javascript/](https://www.targomo.com/developers/documentation/javascript/).
 
 Reference docs available [here](https://app.targomo.com/tsdocs/).

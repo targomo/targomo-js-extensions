@@ -6,7 +6,7 @@
   "browser": "targomo-googlemaps.umd.min.js",
   "typings": "./typings/index.googlemaps.d.ts",
   "dependencies": {
-    "@targomo/core": "^0.2.3",
+    "@targomo/core": "^0.5.2",
     "@types/googlemaps": "^3.30.10"
   }
 }

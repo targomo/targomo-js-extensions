@@ -10,7 +10,7 @@ The Targomo Googlemaps extensions Typescript library provides extensions for vis
 
 # API Key
 
-[Get your free API key by signing up for a Targomo account](https://account.targomo.com/signup?plan=free)
+[Get your free API key by signing up for a Targomo account](https://www.targomo.com/developers/pricing/)
 
 # Regions
 
@@ -39,6 +39,6 @@ Example usage for polygon layer
 
 # Docs
 
-More detailed overviews of Targomo's services, along with code examples and demos is available at [https://targomo.com/developers/libraries/javascript/](https://targomo.com/developers/documentation/javascript/).
+More detailed overviews of Targomo's services, along with code examples and demos is available at [https://www.targomo.com/developers/documentation/javascript/](https://www.targomo.com/developers/documentation/javascript/).
 
 Reference docs available [here](https://app.targomo.com/tsdocs/).
